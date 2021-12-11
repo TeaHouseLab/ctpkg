@@ -3,9 +3,9 @@ function upgrade
   switch $package_manager
   case apt aptitude
     sudo $package_manager update
-    sudo $package_manager upgrade
+    sudo $package_manager upgrade $argv
   case pacman
-    sudo $package_manager -Syu
+    sudo $package_manager -Syu $argv
   case '*'
     set_color red
     echo "$prefix No support package manager detected"

@@ -73,9 +73,9 @@ function upgrade
   switch $package_manager
   case apt aptitude
     sudo $package_manager update
-    sudo $package_manager upgrade
+    sudo $package_manager upgrade $argv
   case pacman
-    sudo $package_manager -Syu
+    sudo $package_manager -Syu $argv
   case '*'
     set_color red
     echo "$prefix No support package manager detected"
@@ -170,7 +170,7 @@ function detectos
   echo "$prefix Set backend as $package_manager"
   set_color normal
 end
-echo Build_Time_UTC=2021-12-11_09:34:40
+echo Build_Time_UTC=2021-12-11_09:38:56
 set prefix [ctpkg]
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version FrostFlower@build0 | TeaHouseLab at ruzhtw.top"
@@ -193,7 +193,7 @@ case sc
 case upd
   update
 case upg
-  upgrade
+  upgrade $argv[2..-1]
 case ctpm
   ctpm $argv[2] $argv[3..-1]
 case v version

@@ -20,7 +20,7 @@ case sc
 case upd
   update
 case upg
-  upgrade
+  upgrade $argv[2..-1]
 case ctpm
   ctpm $argv[2] $argv[3..-1]
 case v version
