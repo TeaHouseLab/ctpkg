@@ -1,0 +1,30 @@
+function help_echo
+  set_color cyan
+  set_color normal
+  echo "==========Help Documentation=========="
+  set_color green
+  echo "argv[1] argv[2+]"
+  set_color normal
+  echo " -argv[1]:the command to execute"
+  echo "  -Available:c(clean cache)
+             i(install)
+             p(purge)
+             s(search)
+             l(list installed package)
+             si(show info of a package)
+             sc(source used)
+             upd(update datebase)
+             upg(upgrade)"
+  echo " -argv[2+]:the package you want to change"
+  echo "--------------------------------------"
+  set_color green
+  echo "ctpm argv[2+]"
+  set_color normal
+  echo " -argv[1]:the command to execute"
+  echo "  -Available:c(clean cache)
+             i(install)
+             p(purge)
+             l(list installed package)"
+  echo " -argv[2+]:the package you want to change"
+  echo "========================================"
+end
