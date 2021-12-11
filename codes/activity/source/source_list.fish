@@ -1,5 +1,5 @@
 function source_list
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     cat /etc/apt/sources.list  | grep --color=never "deb"

@@ -1,5 +1,5 @@
 function list
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     apt list --installed

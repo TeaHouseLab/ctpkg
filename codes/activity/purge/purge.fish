@@ -1,5 +1,5 @@
 function purge
-  detect-backend
+  detectos
   switch $package_manager
   case apt
     sudo $package_manager purge $argv

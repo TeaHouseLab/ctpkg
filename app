@@ -30,7 +30,7 @@ function help_echo
   echo "========================================"
 end
 function clean
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     sudo $package_manager clean
@@ -43,7 +43,7 @@ function clean
   end
 end
 function install
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     sudo $package_manager install $argv
@@ -56,7 +56,7 @@ function install
   end
 end
 function search
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     $package_manager search $argv
@@ -69,7 +69,7 @@ function search
   end
 end
 function upgrade
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     sudo $package_manager update
@@ -83,7 +83,7 @@ function upgrade
   end
 end
 function purge
-  detect-backend
+  detectos
   switch $package_manager
   case apt
     sudo $package_manager purge $argv
@@ -100,7 +100,7 @@ function purge
   end
 end
 function list
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     apt list --installed
@@ -113,7 +113,7 @@ function list
   end
 end
 function update
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     sudo $package_manager update
@@ -126,7 +126,7 @@ function update
   end
 end
 function source_list
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     cat /etc/apt/sources.list  | grep --color=never "deb"
@@ -141,7 +141,7 @@ function source_list
   end
 end
 function show
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     $package_manager show $argv
@@ -170,7 +170,7 @@ function detectos
   echo "$prefix Set backend as $package_manager"
   set_color normal
 end
-echo Build_Time_UTC=2021-12-11_09:31:21
+echo Build_Time_UTC=2021-12-11_09:34:40
 set prefix [ctpkg]
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version FrostFlower@build0 | TeaHouseLab at ruzhtw.top"
@@ -203,6 +203,7 @@ case v version
 case h help '*'
   help_echo
 end
+set -e package_manager
 set_color cyan
 echo "$prefix Done"
 set_color normal

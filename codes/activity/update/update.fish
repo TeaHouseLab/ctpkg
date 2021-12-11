@@ -1,5 +1,5 @@
 function update
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     sudo $package_manager update

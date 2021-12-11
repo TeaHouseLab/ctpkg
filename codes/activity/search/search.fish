@@ -1,5 +1,5 @@
 function search
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     $package_manager search $argv

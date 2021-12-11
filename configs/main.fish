@@ -30,6 +30,7 @@ case v version
 case h help '*'
   help_echo
 end
+set -e package_manager
 set_color cyan
 echo "$prefix Done"
 set_color normal

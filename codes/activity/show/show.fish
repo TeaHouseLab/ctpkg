@@ -1,5 +1,5 @@
 function show
-  detect-backend
+  detectos
   switch $package_manager
   case apt aptitude
     $package_manager show $argv
