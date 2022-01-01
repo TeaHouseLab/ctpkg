@@ -1,13 +1,15 @@
 function list
-  detectos
-  switch $package_manager
-  case apt aptitude
-    apt list --installed
-  case pacman
-    $package_manager -Qq
-  case '*'
-    set_color red
-    echo "$prefix No support package manager detected"
-    set_color normal
-  end
+    detectos
+    switch $package_manager
+        case apt aptitude
+            apt list --installed $argv
+        case pacman
+            $package_manager -Qq $argv
+        case apk
+            $package_manager list $argv
+        case dnf
+            $package_manager list installed $argv
+        case '*'
+          logger 4 "$prefix No support package manager detected"
+    end
 end

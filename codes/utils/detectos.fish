@@ -11,7 +11,13 @@ function detectos
   if test -e /etc/arch-release
     set -g package_manager pacman
   end
-  set_color cyan
-  echo "$prefix Set backend as $package_manager"
-  set_color normal
+  #alpine
+  if cat /etc/os-release | grep -q 'Alpine Linux'
+    set -g package_manager apk
+  end
+  #fedora
+  if test -e /etc/fedora-release
+    set -g package_manager dnf
+  end
+  logger 0 "Set backend as $package_manager"
 end

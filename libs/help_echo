@@ -15,13 +15,13 @@ function help_echo
              sc(source used)
              upd(update datebase)
              upg(upgrade)"
-  echo " -argv[2+]:the package you want to change"
+  echo " -argv[2+]:the package you want to do on"
   echo "--------------------------------------"
   set_color green
   echo "ctpm argv[2+]"
   set_color normal
   echo " -argv[1]:the command to execute"
-  echo "  -Available:c(clean cache)
+  echo "  -Available:
              i(install)
              p(purge)
              l(list installed package)"
