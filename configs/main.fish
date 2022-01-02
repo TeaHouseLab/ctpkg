@@ -1,4 +1,10 @@
 set -lx prefix [ctpkg]
+ctconfig_init
+set ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
+if [ "$ctpm_source" = "" ]
+else
+set -lx ctpm_source https://cdngit.ruzhtw.top/ctpm/
+end
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
 set_color normal

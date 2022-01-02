@@ -419,6 +419,17 @@ function sys_purge
     end
 end
 
+function ctconfig_init
+    if test -d /etc/centerlinux/conf.d/
+    else
+        set_color red
+        echo "$prefix Detected First Launching,We need your password to create the config file"
+        set_color normal
+        sudo mkdir -p /etc/centerlinux/conf.d/
+    end
+    sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
+end
+
 function check_environment
     if test -d /var/lib/ctpm/package_info
     else
@@ -467,8 +478,13 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_05:21:49
+echo Build_Time_UTC=2022-01-02_05:29:59
 set -lx prefix [ctpkg]
+set ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
+if [ "$ctpm_source" = "" ]
+else
+set -lx ctpm_source https://cdngit.ruzhtw.top/ctpm/
+end
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
 set_color normal
