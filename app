@@ -26,7 +26,9 @@ function help_echo
   echo "  -Available:
              i(install)
              p(purge)
-             l(list installed package)"
+             l(list installed package)
+             pack(make a ctpkg package)
+             grab(download and install a package from online repo)"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end
@@ -478,7 +480,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_06:03:11
+echo Build_Time_UTC=2022-01-02_06:05:08
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
