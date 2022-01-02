@@ -10,6 +10,6 @@ function user_install
         else
             mkdir -p ~/.$src_file_dirname
         end
-        mv -f src$src_file ~/.$src_file
+        mv -f src$src_file ~/.$src_file >/dev/null
     end
 end

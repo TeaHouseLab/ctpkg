@@ -9,6 +9,6 @@ function sys_install
         else
             sudo mkdir "$src_file_dirname"
         end
-        sudo mv -f src$src_file $src_file
+        sudo mv -f src$src_file $src_file >/dev/null
     end
 end
