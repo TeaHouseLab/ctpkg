@@ -301,11 +301,16 @@ end
 function user_install
     logger 0 "installing $package_name as user level"
     cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
-    echo package_name=$package_name | sudo tee ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_ver=$package_ver | sudo tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_level=$package_level | sudo tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     for src_file in (cat src/file_list)
-        sudo mv -f src$src_file ~/$src_file
+        set src_file_dirname (dirname $src_file)
+        if test -d $src_file_dirname
+        else
+            mkdir -p ~/.$src_file_dirname
+        end
+        mv -f src$src_file ~/.$src_file
     end
 end
 
@@ -313,10 +318,10 @@ function user_purge
     for package_ctpm in $argv
         if test -e ~/.ctpm/package_info/$package_ctpm
             for src_file in (cat ~/.ctpm/package_info/$package_ctpm)
-                sudo rm -rf ~/$src_file
+                rm -rf ~/$src_file
             end
-            sudo rm ~/.ctpm/package_info/$package_ctpm
-            sudo rm ~/.ctpm/package_info/$package_ctpm.info
+            rm ~/.ctpm/package_info/$package_ctpm
+            rm ~/.ctpm/package_info/$package_ctpm.info
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
@@ -392,6 +397,10 @@ function sys_install
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     for src_file in (cat src/file_list)
+        if test -d "$src_file_dirname"
+        else
+            sudo mkdir "$src_file_dirname"
+        end
         sudo mv -f src$src_file $src_file
     end
 end
@@ -480,7 +489,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_06:05:08
+echo Build_Time_UTC=2022-01-02_06:31:20
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
