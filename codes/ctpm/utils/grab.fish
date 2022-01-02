@@ -1,6 +1,6 @@
 function grab
     for ctpm_package in $argv
-        curl -s -L -o /tmp/$ctpm_package https://cdngit.ruzhtw.top/ctpm/$ctpm_package.ctpkg
+        curl -s -L -o /tmp/$ctpm_package $ctpm_source/$ctpm_package.ctpkg
         cd /tmp
         ctpm i $ctpm_package
         rm $ctpm_package
