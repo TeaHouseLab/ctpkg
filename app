@@ -460,14 +460,14 @@ end
 
 function grab
     for ctpm_package in $argv
-        curl -s -L -o /tmp/$ctpm_package https://cdngit.ruzhtw.top/ctpm/$ctpm_package
+        curl -s -L -o /tmp/$ctpm_package https://cdngit.ruzhtw.top/ctpm/$ctpm_package.ctpkg
         cd /tmp
         ctpm i $ctpm_package
         rm $ctpm_package
     end
 end
 
-echo Build_Time_UTC=2022-01-02_05:16:38
+echo Build_Time_UTC=2022-01-02_05:21:49
 set -lx prefix [ctpkg]
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
