@@ -1,4 +1,5 @@
 #!/usr/bin/env fish
+
 function help_echo
   set_color cyan
   set_color normal
@@ -25,11 +26,13 @@ function help_echo
   echo "  -Available:
              i(install)
              p(purge)
-             l(list installed package)"
+             l(list installed package)
+             pack(make a ctpkg package)
+             grab(download and install a package from online repo)"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end
-#!/usr/bin/env fish
+
 function logger-warn
   set_color magenta
   echo "$prefix [Warn] $argv[1..-1]"
@@ -69,6 +72,7 @@ case 4
   logger-error $argv[2..-1]
 end
 end
+
 function checkdependence
   if test -e $argv
     echo -e "\033[32m[checkdependence]check passed - $argv exist\033[0m"
@@ -95,6 +99,7 @@ end
 function list_menu
 ls $argv | sed '\~//~d'
 end
+
 function install_script
 set installname $argv[1]
   set dir (realpath (dirname (status -f)))
@@ -112,6 +117,7 @@ set installname $argv[1]
   echo "$prefix Removed"
   set_color normal
 end
+
 function clean
     detectos
     switch $package_manager
@@ -127,6 +133,7 @@ function clean
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function install
     detectos
     switch $package_manager
@@ -142,6 +149,7 @@ function install
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function search
     detectos
     switch $package_manager
@@ -153,6 +161,7 @@ function search
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function upgrade
     detectos
     switch $package_manager
@@ -170,6 +179,7 @@ function upgrade
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function purge
     detectos
     switch $package_manager
@@ -189,6 +199,7 @@ function purge
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function list
     detectos
     switch $package_manager
@@ -204,6 +215,7 @@ function list
           logger 4 "$prefix No support package manager detected"
     end
 end
+
 function update
     detectos
     switch $package_manager
@@ -219,6 +231,7 @@ function update
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function source_list
     detectos
     switch $package_manager
@@ -236,6 +249,7 @@ function source_list
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function show
     detectos
     switch $package_manager
@@ -249,6 +263,7 @@ function show
             logger 4 "$prefix No support package manager detected"
     end
 end
+
 function detectos
   #debian
   if test -e /etc/debian_version
@@ -272,53 +287,71 @@ function detectos
   end
   logger 0 "Set backend as $package_manager"
 end
-function user_list
-    echo ">Installed<"
-    list_menu ~/.ctpm/package_info/
-endfunction user_install
-    logger 0 "installing $package_name as user level"
-    echo package_unis=$package_unis >~/.ctpm/package_info/$package_name
-    for src_file in (ls -a src/)
-        echo ~/ctpm_pkg/$package_name/$src_file >>~/.ctpm/package_info/$package_name
-        if test -d "~/ctpm_pkg/$package_name"
-        else
-            mkdir -p ~/ctpm_pkg/$package_name
-        end
-        sudo mv src/$src_file ~/ctpm_pkg/$package_name
-    end
-end
-function user_purge
-    for package_ctpm in $argv[1..-1]
-        set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm | sed 's/package_unis=//g')
-        switch $package_unis
-            case 0
-                if test -d ~/ctpm_pkg/$package_ctpm
-                    rm -rf ~/ctpm_pkg/$package_ctpm
-                    logger 1 "src files of package:$package_ctpm Purged"
-                else
-                    logger 4 "no such directoryof package:$package_ctpm,abort"
-                end
-                if test -e ~/.ctpm/package_info/$package_ctpm
-                    rm ~/.ctpm/package_info/$package_ctpm
-                    logger 1 "info file of package:$package_ctpm Purged"
-                    logger 1 purged package $package_ctpm
-                else
-                    logger 4 "no info file of package:$package_ctpm,abort"
-                end
-            case 1
-                if test -e ~/ctpm_pkg/$package_ctpm/unis.sh
-                    chmod +x ~/ctpm_pkg/$package_ctpm/unis.sh
-                    logger 0 'Exec the autopurge script'
-                    ~/ctpm_pkg/$package_ctpm/unis.sh
-                else
-                    logger 4 'no autopurge script of package:$package_ctpm,abort'
-                end
-        end
-    end
-end
-function pack
 
-endfunction extract
+function user_list
+    if ls -1qA ~/.ctpm/package_info/ | grep -q .
+        echo ">Installed-UserLevel<"
+        cd ~/.ctpm/package_info/
+        list_menu *.info | sed 's/.info//g'
+    else
+        echo ">Installed-UserLevel<"
+    end
+end
+
+function user_install
+    logger 0 "installing $package_name as user level"
+    cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
+    echo package_name=$package_name | sudo tee ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | sudo tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | sudo tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    for src_file in (cat src/file_list)
+        sudo mv -f src$src_file ~/$src_file
+    end
+end
+
+function user_purge
+    for package_ctpm in $argv
+        if test -e ~/.ctpm/package_info/$package_ctpm
+            for src_file in (cat ~/.ctpm/package_info/$package_ctpm)
+                sudo rm -rf ~/$src_file
+            end
+            sudo rm ~/.ctpm/package_info/$package_ctpm
+            sudo rm ~/.ctpm/package_info/$package_ctpm.info
+            logger 1 purged package:$package_ctpm
+        else
+            logger 4 "no info file of package:$package_ctpm,abort"
+        end
+    end
+end
+
+function ctpm_show
+    for package_ctpm in $argv[1..-1]
+        if test -e /var/lib/ctpm/package_info/$package_ctpm.info
+            set package_level (sed -n '/package_level=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
+            set package_name (sed -n '/package_name=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_name=//g')
+            set package_ver (sed -n '/package_ver=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_ver=//g')
+            echo "-----------"
+            echo "package_name: $package_name"
+            echo "package_ver: $package_ver"
+            echo "package_level: $package_level"
+            echo "-----------"
+        end
+        if test -e ~/.ctpm/package_info/$package_ctpm.info
+            set package_level (sed -n '/package_level=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
+            set package_name (sed -n '/package_name=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_name=//g')
+            set package_ver (sed -n '/package_ver=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_ver=//g')
+            echo "-----------"
+            echo "package_name: $package_name"
+            echo "package_ver: $package_ver"
+            echo "package_level: $package_level"
+            echo "-----------"
+        end
+    end
+end
+
+function extract
+    set -lx package_ctpm
+    check_environment
     if test -d /tmp/ctpm
     else
         mkdir /tmp/ctpm
@@ -327,15 +360,19 @@ endfunction extract
     else
         logger 4 '/tmp/ctpm is not accessable to this user,abort'
     end
-    for package_ctpm in $argv[1..-1]
-        mv $package_ctpm /tmp/ctpm
+    for package_ctpm in $argv
+        if test -e $package_ctpm.ctpkg
+        else
+            logger 4 "$package_ctpm.ctpkg not found,abort"
+            exit
+        end
+        cp $package_ctpm.ctpkg /tmp/ctpm
         cd /tmp/ctpm
         logger 0 'Extracting the package'
-        tar xf $package_ctpm
+        tar xf $package_ctpm.ctpkg
         set -lx package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
-        set -lx package_unis (sed -n '/package_unis=/'p ctpm_pkg_info | sed 's/package_unis=//g')
         switch $package_level
             case user
                 user_install
@@ -344,52 +381,115 @@ endfunction extract
         end
         cd ..
         rm -rf ctpm
-        logger 0 'Processed'
+        logger 0 Processed
     end
 end
+
 function sys_install
     logger 0 "installing $package_name ver:$package_ver as sys level"
-    sudo sh -c 'echo package_unis=$package_unis > /var/lib/ctpm/package_info/$package_name'
-    for src_file in (ls -a src/)
-        sudo sh -c 'echo /$src_file >> /var/lib/ctpm/package_info/$package_name'
-        sudo mv src/$src_file /
+    cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
+    echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    for src_file in (cat src/file_list)
+        sudo mv -f src$src_file $src_file
     end
 end
+
 function sys_list
-echo ">Installed<"
-list_menu /var/lib/ctpm/package_info
-endfunction sys_purge
-    for package_ctpm in $argv[1..-1]
+    if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
+        echo ">Installed-SysLevel<"
+        cd /var/lib/ctpm/package_info/
+        list_menu *.info | sed 's/.info//g'
+    else
+        echo ">Installed-SysLevel<"
+    end
+end
+
+function sys_purge
+    for package_ctpm in $argv
         if test -e /var/lib/ctpm/package_info/$package_ctpm
             for src_file in (cat /var/lib/ctpm/package_info/$package_ctpm)
                 sudo rm -rf $src_file
             end
+            sudo rm /var/lib/ctpm/package_info/$package_ctpm
+            sudo rm /var/lib/ctpm/package_info/$package_ctpm.info
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
         end
     end
 end
+
+function ctconfig_init
+    if test -d /etc/centerlinux/conf.d/
+    else
+        set_color red
+        echo "$prefix Detected First Launching,We need your password to create the config file"
+        set_color normal
+        sudo mkdir -p /etc/centerlinux/conf.d/
+        sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
+    end
+end
+
 function check_environment
-    logger 2 'Testing for sys level'
     if test -d /var/lib/ctpm/package_info
     else
         sudo mkdir -p /var/lib/ctpm/package_info
     end
-    logger 2 'Tesing for user level'
     if test -d ~/.ctpm/package_info
     else
-        sudo mkdir -p ~/.ctpm/package_info
-    end
-    if test -d ~/ctpm_pkg
-    else
-        mkdir -p ~/.ctpm_pkg
+        mkdir -p ~/.ctpm/package_info
     end
 end
-echo Build_Time_UTC=2022-01-01_09:16:36
+
+function pack
+    set package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
+    set package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
+    set package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
+    if [ "$package_name" = "" ]
+        logger 4 'No package_name defined,abort'
+        exit
+    end
+    if [ "$package_ver" = "" ]
+        logger 4 'No package_ver defined,abort'
+        exit
+    end
+    if [ "$package_level" = "" ]
+        logger 4 'No package_level defined,abort'
+        exit
+    end
+    if test -d src
+        if test -e src/file_list
+        else
+            logger 4 'No src/file_list defined,abort'
+        end
+    else
+        logger 4 'No src directory,abort'
+    end
+    tar zcf $package_name.ctpkg .
+    logger 0 "Processed,store at $package_name.ctpkg"
+end
+
+function grab
+    for ctpm_package in $argv
+        curl -s -L -o /tmp/$ctpm_package $ctpm_source/$ctpm_package.ctpkg
+        cd /tmp
+        ctpm i $ctpm_package
+        rm $ctpm_package
+    end
+end
+
+echo Build_Time_UTC=2022-01-02_06:05:08
 set -lx prefix [ctpkg]
+ctconfig_init
+set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
+if [ "$ctpm_source" = "" ]
+else
+set ctpm_source https://cdngit.ruzhtw.top/ctpm/
+end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version FrostFlower@build22 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -420,6 +520,9 @@ switch $argv[1]
                         sys_list
                     case user
                         user_list
+                    case '*'
+                        sys_list
+                        user_list
                 end
             case p
                 switch $argv[3]
@@ -428,6 +531,12 @@ switch $argv[1]
                     case user
                         user_purge $argv[4..-1]
                 end
+            case ss
+                ctpm_show $argv[3..-1]
+            case pack
+                pack
+            case grub
+                grub $argv[3..-1]
         end
     case install
         install_script ctpkg
@@ -435,7 +544,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "FrostFlower@build22"
+        echo "FrostFlower@build31"
         set_color normal
     case h help '*'
         help_echo

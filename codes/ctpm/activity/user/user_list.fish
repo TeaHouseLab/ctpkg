@@ -1,4 +1,9 @@
 function user_list
-    echo ">Installed<"
-    list_menu ~/.ctpm/package_info/
+    if ls -1qA ~/.ctpm/package_info/ | grep -q .
+        echo ">Installed-UserLevel<"
+        cd ~/.ctpm/package_info/
+        list_menu *.info | sed 's/.info//g'
+    else
+        echo ">Installed-UserLevel<"
+    end
 end

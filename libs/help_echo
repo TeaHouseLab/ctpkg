@@ -24,7 +24,9 @@ function help_echo
   echo "  -Available:
              i(install)
              p(purge)
-             l(list installed package)"
+             l(list installed package)
+             pack(make a ctpkg package)
+             grab(download and install a package from online repo)"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end

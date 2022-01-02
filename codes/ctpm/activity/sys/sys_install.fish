@@ -1,8 +1,10 @@
 function sys_install
     logger 0 "installing $package_name ver:$package_ver as sys level"
-    sudo sh -c 'echo package_unis=$package_unis > /var/lib/ctpm/package_info/$package_name'
-    for src_file in (ls -a src/)
-        sudo sh -c 'echo /$src_file >> /var/lib/ctpm/package_info/$package_name'
-        sudo mv src/$src_file /
+    cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
+    echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    for src_file in (cat src/file_list)
+        sudo mv -f src$src_file $src_file
     end
 end
