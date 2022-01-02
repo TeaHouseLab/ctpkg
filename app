@@ -310,7 +310,7 @@ function user_install
         else
             mkdir -p ~/.$src_file_dirname
         end
-        mv -f src$src_file ~/.$src_file
+        mv -f src$src_file ~/.$src_file >/dev/null
     end
 end
 
@@ -401,7 +401,7 @@ function sys_install
         else
             sudo mkdir "$src_file_dirname"
         end
-        sudo mv -f src$src_file $src_file
+        sudo mv -f src$src_file $src_file >/dev/null
     end
 end
 
@@ -489,7 +489,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_06:31:20
+echo Build_Time_UTC=2022-01-02_14:05:30
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
