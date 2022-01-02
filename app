@@ -27,7 +27,6 @@ function help_echo
              i(install)
              p(purge)
              l(list installed package)
-             pack(make a ctpkg package)
              grab(download and install a package from online repo)"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
@@ -452,34 +451,6 @@ function check_environment
     end
 end
 
-function pack
-    set package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
-    set package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
-    set package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
-    if [ "$package_name" = "" ]
-        logger 4 'No package_name defined,abort'
-        exit
-    end
-    if [ "$package_ver" = "" ]
-        logger 4 'No package_ver defined,abort'
-        exit
-    end
-    if [ "$package_level" = "" ]
-        logger 4 'No package_level defined,abort'
-        exit
-    end
-    if test -d src
-        if test -e src/file_list
-        else
-            logger 4 'No src/file_list defined,abort'
-        end
-    else
-        logger 4 'No src directory,abort'
-    end
-    tar zcf $package_name.ctpkg .
-    logger 0 "Processed,store at $package_name.ctpkg"
-end
-
 function grab
     for ctpm_package in $argv
         curl -s -L -o /tmp/$ctpm_package $ctpm_source/$ctpm_package.ctpkg
@@ -489,7 +460,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_14:05:30
+echo Build_Time_UTC=2022-01-02_14:23:52
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -542,8 +513,6 @@ switch $argv[1]
                 end
             case ss
                 ctpm_show $argv[3..-1]
-            case pack
-                pack
             case grub
                 grub $argv[3..-1]
         end

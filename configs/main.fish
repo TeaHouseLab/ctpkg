@@ -50,8 +50,6 @@ switch $argv[1]
                 end
             case ss
                 ctpm_show $argv[3..-1]
-            case pack
-                pack
             case grub
                 grub $argv[3..-1]
         end
