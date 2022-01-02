@@ -5,6 +5,10 @@ function sys_install
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     for src_file in (cat src/file_list)
+        if test -d "$src_file_dirname"
+        else
+            sudo mkdir "$src_file_dirname"
+        end
         sudo mv -f src$src_file $src_file
     end
 end
