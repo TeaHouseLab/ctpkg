@@ -1,6 +1,6 @@
 set -lx prefix [ctpkg]
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version FrostFlower@build22 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -31,6 +31,9 @@ switch $argv[1]
                         sys_list
                     case user
                         user_list
+                    case '*'
+                        sys_list
+                        user_list
                 end
             case p
                 switch $argv[3]
@@ -39,6 +42,12 @@ switch $argv[1]
                     case user
                         user_purge $argv[4..-1]
                 end
+            case ss
+                ctpm_show $argv[3..-1]
+            case pack
+                pack
+            case grub
+                grub $argv[3..-1]
         end
     case install
         install_script ctpkg
@@ -46,7 +55,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "FrostFlower@build22"
+        echo "FrostFlower@build31"
         set_color normal
     case h help '*'
         help_echo
