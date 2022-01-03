@@ -27,7 +27,15 @@ function help_echo
              i(install)
              p(purge)
              l(list installed package)
-             grab(download and install a package from online repo)"
+             grab(download and install a package from online repo)
+                argv[3]:
+                  -Available:
+                      l:list package in online repo
+                      s:search package in online repo
+                      xxx:the name of package
+                  For example:
+                  ctpkg ctpm grab l:list package
+                  ctpkg ctpm grab matcha-gtk-theme:install this package"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end
@@ -289,11 +297,15 @@ end
 
 function user_list
     if ls -1qA ~/.ctpm/package_info/ | grep -q .
+        set_color red
         echo ">Installed-UserLevel<"
+        set_color normal
         cd ~/.ctpm/package_info/
         list_menu *.info | sed 's/.info//g'
     else
+        set_color red
         echo ">Installed-UserLevel<"
+        set_color normal
     end
 end
 
@@ -307,9 +319,9 @@ function user_install
         set src_file_dirname (dirname $src_file)
         if test -d $src_file_dirname
         else
-            mkdir -p ~/.$src_file_dirname
+            mkdir -p ~/.$src_file_dirname 2>/dev/null
         end
-        mv -f src$src_file ~/.$src_file >/dev/null
+        mv -f src$src_file ~/.$src_file 2>/dev/null
     end
 end
 
@@ -398,19 +410,23 @@ function sys_install
     for src_file in (cat src/file_list)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname"
+            sudo mkdir "$src_file_dirname" 2>/dev/null
         end
-        sudo mv -f src$src_file $src_file >/dev/null
+        sudo mv -f src$src_file $src_file 2>/dev/null
     end
 end
 
 function sys_list
     if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
+        set_color red
         echo ">Installed-SysLevel<"
+        set_color normal
         cd /var/lib/ctpm/package_info/
         list_menu *.info | sed 's/.info//g'
     else
+        set_color red
         echo ">Installed-SysLevel<"
+        set_color normal
     end
 end
 
@@ -452,15 +468,37 @@ function check_environment
 end
 
 function grab
-    for ctpm_package in $argv
-        curl -s -L -o /tmp/$ctpm_package $ctpm_source/$ctpm_package.ctpkg
-        cd /tmp
-        ctpm i $ctpm_package
-        rm $ctpm_package
+    logger 0 "Using ctpm source:$ctpm_source"
+    switch $argv[1]
+        case l
+            echo "found in source:"
+            curl -s -L $ctpm_source/list
+        case s
+            for ctpm_package in $argv[2..-1]
+                echo "found in source:"
+                curl -s -L $ctpm_source/list | grep $ctpm_package
+            end
+        case '*'
+            for ctpm_package in $argv
+                if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
+                    if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
+                    else
+                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again"
+                        rm /tmp/$ctpm_package.ctpkg
+                        exit
+                    end
+                    logger 1 "package:$ctpm_package downloaded,installing..."
+                    cd /tmp
+                    extract $ctpm_package
+                    rm $ctpm_package.ctpkg
+                else
+                    logger 4 "package:$ctpm_package failed to download,ignored"
+                end
+            end
     end
 end
 
-echo Build_Time_UTC=2022-01-02_14:23:52
+echo Build_Time_UTC=2022-01-03_04:58:10
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -513,8 +551,8 @@ switch $argv[1]
                 end
             case ss
                 ctpm_show $argv[3..-1]
-            case grub
-                grub $argv[3..-1]
+            case grab
+                grab $argv[3..-1]
         end
     case install
         install_script ctpkg

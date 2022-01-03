@@ -7,8 +7,8 @@ function sys_install
     for src_file in (cat src/file_list)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname"
+            sudo mkdir "$src_file_dirname" 2>/dev/null
         end
-        sudo mv -f src$src_file $src_file >/dev/null
+        sudo mv -f src$src_file $src_file 2>/dev/null
     end
 end

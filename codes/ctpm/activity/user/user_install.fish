@@ -8,8 +8,8 @@ function user_install
         set src_file_dirname (dirname $src_file)
         if test -d $src_file_dirname
         else
-            mkdir -p ~/.$src_file_dirname
+            mkdir -p ~/.$src_file_dirname 2>/dev/null
         end
-        mv -f src$src_file ~/.$src_file >/dev/null
+        mv -f src$src_file ~/.$src_file 2>/dev/null
     end
 end

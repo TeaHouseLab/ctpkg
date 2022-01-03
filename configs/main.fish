@@ -50,8 +50,8 @@ switch $argv[1]
                 end
             case ss
                 ctpm_show $argv[3..-1]
-            case grub
-                grub $argv[3..-1]
+            case grab
+                grab $argv[3..-1]
         end
     case install
         install_script ctpkg
