@@ -27,7 +27,15 @@ function help_echo
              i(install)
              p(purge)
              l(list installed package)
-             grab(download and install a package from online repo)"
+             grab(download and install a package from online repo)
+                argv[3]:
+                  -Available:
+                      l:list package in online repo
+                      s:search package in online repo
+                      xxx:the name of package
+                  For example:
+                  ctpkg ctpm grab l:list package
+                  ctpkg ctpm grab matcha-gtk-theme:install this package"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end
@@ -289,11 +297,15 @@ end
 
 function user_list
     if ls -1qA ~/.ctpm/package_info/ | grep -q .
+        set_color red
         echo ">Installed-UserLevel<"
+        set_color normal
         cd ~/.ctpm/package_info/
         list_menu *.info | sed 's/.info//g'
     else
+        set_color red
         echo ">Installed-UserLevel<"
+        set_color normal
     end
 end
 
@@ -406,11 +418,15 @@ end
 
 function sys_list
     if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
+        set_color red
         echo ">Installed-SysLevel<"
+        set_color normal
         cd /var/lib/ctpm/package_info/
         list_menu *.info | sed 's/.info//g'
     else
+        set_color red
         echo ">Installed-SysLevel<"
+        set_color normal
     end
 end
 
@@ -452,20 +468,22 @@ function check_environment
 end
 
 function grab
+    logger 0 "Using ctpm source:$ctpm_source"
     switch $argv[1]
         case l
+            echo "found in source:"
             curl -s -L $ctpm_source/list
         case s
             for ctpm_package in $argv[2..-1]
-                printf "found in source:"
+                echo "found in source:"
                 curl -s -L $ctpm_source/list | grep $ctpm_package
             end
-        case *
+        case '*'
             for ctpm_package in $argv
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'tar archive'
                     else
-                        logger 4 "The package seems not a ctpkg file,remove and abort"
+                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again"
                         rm /tmp/$ctpm_package.ctpkg
                         exit
                     end
@@ -480,7 +498,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-03_04:40:01
+echo Build_Time_UTC=2022-01-03_04:48:15
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
