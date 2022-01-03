@@ -460,7 +460,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-03_04:16:48
+echo Build_Time_UTC=2022-01-03_04:29:53
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -513,8 +513,8 @@ switch $argv[1]
                 end
             case ss
                 ctpm_show $argv[3..-1]
-            case grub
-                grub $argv[3..-1]
+            case grab
+                grab $argv[3..-1]
         end
     case install
         install_script ctpkg
