@@ -12,7 +12,7 @@ function grab
         case '*'
             for ctpm_package in $argv
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
-                    if file /tmp/$ctpm_package.ctpkg | grep -q 'tar archive'
+                    if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
                         logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again"
                         rm /tmp/$ctpm_package.ctpkg
@@ -21,7 +21,7 @@ function grab
                     logger 1 "package:$ctpm_package downloaded,installing..."
                     cd /tmp
                     extract $ctpm_package
-                    rm $ctpm_package
+                    rm $ctpm_package.ctpkg
                 else
                     logger 4 "package:$ctpm_package failed to download,ignored"
                 end
