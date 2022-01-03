@@ -307,9 +307,9 @@ function user_install
         set src_file_dirname (dirname $src_file)
         if test -d $src_file_dirname
         else
-            mkdir -p ~/.$src_file_dirname
+            mkdir -p ~/.$src_file_dirname 2>/dev/null
         end
-        mv -f src$src_file ~/.$src_file >/dev/null
+        mv -f src$src_file ~/.$src_file 2>/dev/null
     end
 end
 
@@ -398,9 +398,9 @@ function sys_install
     for src_file in (cat src/file_list)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname"
+            sudo mkdir "$src_file_dirname" 2>/dev/null
         end
-        sudo mv -f src$src_file $src_file >/dev/null
+        sudo mv -f src$src_file $src_file 2>/dev/null
     end
 end
 
@@ -460,7 +460,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-02_14:23:52
+echo Build_Time_UTC=2022-01-03_04:16:48
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
