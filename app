@@ -455,12 +455,12 @@ function grab
     for ctpm_package in $argv
         curl -s -L -o /tmp/$ctpm_package $ctpm_source/$ctpm_package.ctpkg
         cd /tmp
-        ctpm i $ctpm_package
+        extract $ctpm_package
         rm $ctpm_package
     end
 end
 
-echo Build_Time_UTC=2022-01-03_04:29:53
+echo Build_Time_UTC=2022-01-03_04:30:44
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
