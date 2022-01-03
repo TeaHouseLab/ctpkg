@@ -457,7 +457,8 @@ function grab
             curl -s -L $ctpm_source/list
         case s
             for ctpm_package in $argv[2..-1]
-                printf "found in source:"curl -s -L $ctpm_source/list | grep $ctpm_package
+                printf "found in source:"
+                curl -s -L $ctpm_source/list | grep $ctpm_package
             end
         case *
             for ctpm_package in $argv
@@ -479,7 +480,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-03_04:37:44
+echo Build_Time_UTC=2022-01-03_04:40:01
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')

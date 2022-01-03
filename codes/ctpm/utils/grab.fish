@@ -4,7 +4,8 @@ function grab
             curl -s -L $ctpm_source/list
         case s
             for ctpm_package in $argv[2..-1]
-                printf "found in source:"curl -s -L $ctpm_source/list | grep $ctpm_package
+                printf "found in source:"
+                curl -s -L $ctpm_source/list | grep $ctpm_package
             end
         case *
             for ctpm_package in $argv
