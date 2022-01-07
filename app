@@ -315,6 +315,11 @@ function user_install
     echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    if [ -s src/unis_hooks ]
+        cat src/unis_hooks | tee -a ~/.ctpm/package_info/$package_name.unis >/dev/null
+        chmod +x ~/.ctpm/package_info/$package_name.unis
+    end
     for src_file in (cat src/file_list)
         set src_file_dirname (dirname $src_file)
         if test -d $src_file_dirname
@@ -323,16 +328,28 @@ function user_install
         end
         mv -f src$src_file ~/.$src_file 2>/dev/null
     end
+    if [ -s hooks ]
+        logger 0 "Running install hooks for $package_name"
+        chmod +x hooks
+        ./hooks
+    end
 end
 
 function user_purge
     for package_ctpm in $argv
+        set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
         if test -e ~/.ctpm/package_info/$package_ctpm
             for src_file in (cat ~/.ctpm/package_info/$package_ctpm)
                 rm -rf ~/$src_file
             end
+            if [ "$package_unis" = "1" ]
+                if test -e ~/.ctpm/package_info/$package_ctpm.unis
+                    ~/.ctpm/package_info/$package_ctpm.unis
+                end
+            end
             rm ~/.ctpm/package_info/$package_ctpm
             rm ~/.ctpm/package_info/$package_ctpm.info
+            rm ~/.ctpm/package_info/$package_ctpm.unis
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
@@ -377,18 +394,19 @@ function extract
         logger 4 '/tmp/ctpm is not accessable to this user,abort'
     end
     for package_ctpm in $argv
-        if test -e $package_ctpm.ctpkg
+        if test -e $package_ctpm
         else
-            logger 4 "$package_ctpm.ctpkg not found,abort"
+            logger 4 "$package_ctpm not found,abort"
             exit
         end
-        cp $package_ctpm.ctpkg /tmp/ctpm
+        cp $package_ctpm /tmp/ctpm
         cd /tmp/ctpm
         logger 0 'Extracting the package'
-        tar xf $package_ctpm.ctpkg
-        set -lx package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
+        tar xf $package_ctpm
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
+        set -lx package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
+        set -lx package_unis (sed -n '/package_unis=/'p ctpm_pkg_info | sed 's/package_unis=//g')
         switch $package_level
             case user
                 user_install
@@ -407,12 +425,23 @@ function sys_install
     echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_unis=$package_unis | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    if [ -s src/unis_hooks ]
+        cat src/unis_hooks | sudo tee -a /var/lib/ctpm/package_info/$package_name.unis >/dev/null
+        sudo chmod +x /var/lib/ctpm/package_info/$package_name.unis
+    end
     for src_file in (cat src/file_list)
+        set src_file_dirname (dirname $src_file)
         if test -d "$src_file_dirname"
         else
             sudo mkdir "$src_file_dirname" 2>/dev/null
         end
         sudo mv -f src$src_file $src_file 2>/dev/null
+    end
+    if [ -s hooks ]
+        logger 0 "Running install hooks for $package_name"
+        sudo chmod +x hooks
+        sudo ./hooks
     end
 end
 
@@ -432,12 +461,19 @@ end
 
 function sys_purge
     for package_ctpm in $argv
+        set package_unis (sed -n '/package_unis=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
         if test -e /var/lib/ctpm/package_info/$package_ctpm
             for src_file in (cat /var/lib/ctpm/package_info/$package_ctpm)
                 sudo rm -rf $src_file
             end
+            if [ "$package_unis" = "1" ]
+                if test -e /var/lib/ctpm/package_info/$package_ctpm.unis
+                    sudo /var/lib/ctpm/package_info/$package_ctpm.unis
+                end
+            end
             sudo rm /var/lib/ctpm/package_info/$package_ctpm
             sudo rm /var/lib/ctpm/package_info/$package_ctpm.info
+            sudo rm /var/lib/ctpm/package_info/$package_ctpm.unis
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
@@ -480,6 +516,7 @@ function grab
             end
         case '*'
             for ctpm_package in $argv
+                logger 0 "Grabbing $ctpm_package"
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
@@ -489,7 +526,7 @@ function grab
                     end
                     logger 1 "package:$ctpm_package downloaded,installing..."
                     cd /tmp
-                    extract $ctpm_package
+                    extract $ctpm_package.ctpkg
                     rm $ctpm_package.ctpkg
                 else
                     logger 4 "package:$ctpm_package failed to download,ignored"
@@ -498,7 +535,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-03_04:58:10
+echo Build_Time_UTC=2022-01-07_13:55:35
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')

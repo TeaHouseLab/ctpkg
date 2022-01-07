@@ -11,6 +11,7 @@ function grab
             end
         case '*'
             for ctpm_package in $argv
+                logger 0 "Grabbing $ctpm_package"
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
@@ -20,7 +21,7 @@ function grab
                     end
                     logger 1 "package:$ctpm_package downloaded,installing..."
                     cd /tmp
-                    extract $ctpm_package
+                    extract $ctpm_package.ctpkg
                     rm $ctpm_package.ctpkg
                 else
                     logger 4 "package:$ctpm_package failed to download,ignored"
