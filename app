@@ -516,6 +516,7 @@ function grab
             end
         case '*'
             for ctpm_package in $argv
+                logger 0 "Grabbing $ctpm_package"
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
@@ -534,7 +535,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-07_13:52:25
+echo Build_Time_UTC=2022-01-07_13:55:35
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')

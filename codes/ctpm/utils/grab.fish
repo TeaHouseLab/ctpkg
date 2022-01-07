@@ -11,6 +11,7 @@ function grab
             end
         case '*'
             for ctpm_package in $argv
+                logger 0 "Grabbing $ctpm_package"
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
