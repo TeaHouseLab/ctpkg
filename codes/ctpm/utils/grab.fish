@@ -20,7 +20,7 @@ function grab
                     end
                     logger 1 "package:$ctpm_package downloaded,installing..."
                     cd /tmp
-                    extract $ctpm_package
+                    extract $ctpm_package.ctpkg
                     rm $ctpm_package.ctpkg
                 else
                     logger 4 "package:$ctpm_package failed to download,ignored"
