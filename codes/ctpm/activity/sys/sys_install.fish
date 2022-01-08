@@ -13,9 +13,9 @@ function sys_install
         set src_file_dirname (dirname $src_file)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname" 2>/dev/null
+            sudo mkdir "$src_file_dirname" &>/dev/null
         end
-        sudo mv -f src$src_file $src_file 2>/dev/null
+        sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
         logger 0 "Running install hooks for $package_name"
