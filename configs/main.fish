@@ -59,7 +59,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "FrostFlower@build31"
+        echo "pomelo@build1"
         set_color normal
     case h help '*'
         help_echo

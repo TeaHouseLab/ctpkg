@@ -15,7 +15,7 @@ function help_echo
              l(list installed package)
              si(show info of a package)
              sc(source used)
-             upd(update datebase)
+             upd(update database)
              upg(upgrade)"
   echo " -argv[2+]:the package you want to do on"
   echo "--------------------------------------"
@@ -30,6 +30,7 @@ function help_echo
              grab(download and install a package from online repo)
                 argv[3]:
                   -Available:
+                      upd:update database
                       l:list package in online repo
                       s:search package in online repo
                       xxx:the name of package
@@ -546,7 +547,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-08_01:35:31
+echo Build_Time_UTC=2022-01-08_09:02:10
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -608,7 +609,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "FrostFlower@build31"
+        echo "pomelo@build1"
         set_color normal
     case h help '*'
         help_echo

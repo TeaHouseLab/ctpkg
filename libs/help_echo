@@ -13,7 +13,7 @@ function help_echo
              l(list installed package)
              si(show info of a package)
              sc(source used)
-             upd(update datebase)
+             upd(update database)
              upg(upgrade)"
   echo " -argv[2+]:the package you want to do on"
   echo "--------------------------------------"
@@ -28,6 +28,7 @@ function help_echo
              grab(download and install a package from online repo)
                 argv[3]:
                   -Available:
+                      upd:update database
                       l:list package in online repo
                       s:search package in online repo
                       xxx:the name of package
