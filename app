@@ -547,7 +547,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-08_09:02:10
+echo Build_Time_UTC=2022-01-08_09:06:47
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -556,7 +556,7 @@ else
 set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build1 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c

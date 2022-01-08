@@ -6,7 +6,7 @@ else
 set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version FrostFlower@build31 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build1 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
