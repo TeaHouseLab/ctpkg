@@ -324,9 +324,9 @@ function user_install
         set src_file_dirname (dirname $src_file)
         if test -d $src_file_dirname
         else
-            mkdir -p ~/.$src_file_dirname 2>/dev/null
+            mkdir -p ~/.$src_file_dirname &>/dev/null
         end
-        mv -f src$src_file ~/.$src_file 2>/dev/null
+        mv -f src$src_file ~/.$src_file &>/dev/null
     end
     if [ -s hooks ]
         logger 0 "Running install hooks for $package_name"
@@ -349,7 +349,9 @@ function user_purge
             end
             rm ~/.ctpm/package_info/$package_ctpm
             rm ~/.ctpm/package_info/$package_ctpm.info
+            if test -e ~/.ctpm/package_info/$package_ctpm.unis
             rm ~/.ctpm/package_info/$package_ctpm.unis
+            end
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
@@ -434,9 +436,9 @@ function sys_install
         set src_file_dirname (dirname $src_file)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname" 2>/dev/null
+            sudo mkdir "$src_file_dirname" &>/dev/null
         end
-        sudo mv -f src$src_file $src_file 2>/dev/null
+        sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
         logger 0 "Running install hooks for $package_name"
@@ -466,14 +468,16 @@ function sys_purge
             for src_file in (cat /var/lib/ctpm/package_info/$package_ctpm)
                 sudo rm -rf $src_file
             end
-            if [ "$package_unis" = "1" ]
+            if [ "$package_unis" = 1 ]
                 if test -e /var/lib/ctpm/package_info/$package_ctpm.unis
                     sudo /var/lib/ctpm/package_info/$package_ctpm.unis
                 end
             end
             sudo rm /var/lib/ctpm/package_info/$package_ctpm
             sudo rm /var/lib/ctpm/package_info/$package_ctpm.info
-            sudo rm /var/lib/ctpm/package_info/$package_ctpm.unis
+            if test -d /var/lib/ctpm/package_info/$package_ctpm.unis
+                sudo rm /var/lib/ctpm/package_info/$package_ctpm.unis
+            end
             logger 1 purged package:$package_ctpm
         else
             logger 4 "no info file of package:$package_ctpm,abort"
@@ -506,13 +510,20 @@ end
 function grab
     logger 0 "Using ctpm source:$ctpm_source"
     switch $argv[1]
+        case upd
+            if sudo curl -s -L -o /var/lib/ctpm/world $ctpm_source/list
+                logger 1 "Package List downloaded"
+            else
+                logger 4 "Failed to download package list from online repo,abort"
+                exit
+            end
         case l
             echo "found in source:"
-            curl -s -L $ctpm_source/list
+            cat /var/lib/ctpm/world
         case s
+            echo "found in source:"
             for ctpm_package in $argv[2..-1]
-                echo "found in source:"
-                curl -s -L $ctpm_source/list | grep $ctpm_package
+                grep $ctpm_package /var/lib/ctpm/world
             end
         case '*'
             for ctpm_package in $argv
@@ -535,7 +546,7 @@ function grab
     end
 end
 
-echo Build_Time_UTC=2022-01-07_13:55:35
+echo Build_Time_UTC=2022-01-08_01:35:31
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')

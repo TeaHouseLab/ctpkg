@@ -1,13 +1,20 @@
 function grab
     logger 0 "Using ctpm source:$ctpm_source"
     switch $argv[1]
+        case upd
+            if sudo curl -s -L -o /var/lib/ctpm/world $ctpm_source/list
+                logger 1 "Package List downloaded"
+            else
+                logger 4 "Failed to download package list from online repo,abort"
+                exit
+            end
         case l
             echo "found in source:"
-            curl -s -L $ctpm_source/list
+            cat /var/lib/ctpm/world
         case s
+            echo "found in source:"
             for ctpm_package in $argv[2..-1]
-                echo "found in source:"
-                curl -s -L $ctpm_source/list | grep $ctpm_package
+                grep $ctpm_package /var/lib/ctpm/world
             end
         case '*'
             for ctpm_package in $argv
