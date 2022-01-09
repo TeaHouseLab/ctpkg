@@ -1,8 +1,9 @@
 function user_install
-    logger 0 "installing $package_name as user level"
+    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as user level"
     cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
     echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_relver=$package_relver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]

@@ -1,5 +1,4 @@
 function grab
-    logger 0 "Using ctpm source:$ctpm_source"
     switch $argv[1]
         case upd
             if sudo curl -s -L -o /var/lib/ctpm/world $ctpm_source/list
@@ -7,6 +6,28 @@ function grab
             else
                 logger 4 "Failed to download package list from online repo,abort"
                 exit
+            end
+        case upg
+            logger 0 "Checking for update"
+            for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                if test $package_relver_repo -gt $package_relver
+                    logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                    grab $ctpm_package
+                else
+                    logger 0 "$ctpm_package is the latest package,skip"
+                end
+            end
+            for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                if test $package_relver_repo -gt $package_relver
+                    logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                    grab $ctpm_package
+                else
+                    logger 0 "$ctpm_package is the latest package,skip"
+                end
             end
         case l
             echo "found in source:"

@@ -1,4 +1,5 @@
 function extract
+    set -lx recudir (pwd)
     set -lx package_ctpm
     check_environment
     if test -d /tmp/ctpm
@@ -21,6 +22,7 @@ function extract
         tar xf $package_ctpm
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
+        set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
         set -lx package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
         set -lx package_unis (sed -n '/package_unis=/'p ctpm_pkg_info | sed 's/package_unis=//g')
         switch $package_level
@@ -29,7 +31,7 @@ function extract
             case sys
                 sys_install
         end
-        cd ..
+        cd $recudir
         rm -rf ctpm
         logger 0 Processed
     end
