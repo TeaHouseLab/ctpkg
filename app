@@ -576,7 +576,7 @@ function detectos
   logger 0 "Set backend as $package_manager"
 end
 
-echo Build_Time_UTC=2022-01-09_04:49:21
+echo Build_Time_UTC=2022-01-09_04:51:29
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -639,7 +639,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build1"
+        echo "pomelo@build2"
         set_color normal
     case h help '*'
         help_echo

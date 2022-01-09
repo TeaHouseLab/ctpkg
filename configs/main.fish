@@ -60,7 +60,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build1"
+        echo "pomelo@build2"
         set_color normal
     case h help '*'
         help_echo
