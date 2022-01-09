@@ -126,85 +126,17 @@ set installname $argv[1]
   set_color normal
 end
 
-function purge
+function clean
     detectos
     switch $package_manager
-        case apt
-            sudo $package_manager purge $argv
-            sudo $package_manager autoremove --purge
-        case aptitude
-            sudo $package_manager purge $argv
+        case apt aptitude 
+            sudo $package_manager clean $argv
         case pacman
-            sudo $package_manager -Rn $argv
-            sudo $package_manager -Rn (pacman -Qtdq)
+            sudo $package_manager -Scc $argv
         case apk
-            sudo $package_manager del $argv
+            logger 4 "$prefix No Such function in alpine apk"
         case dnf
-            sudo $package_manager remove $argv
-        case '*'
-            logger 4 "$prefix No support package manager detected"
-    end
-end
-
-function show
-    detectos
-    switch $package_manager
-        case apt aptitude
-            $package_manager show $argv
-        case pacman
-            $package_manager -Si $argv
-        case apk dnf
-            $package_manager info $argv
-        case '*'
-            logger 4 "$prefix No support package manager detected"
-    end
-end
-
-function list
-    detectos
-    switch $package_manager
-        case apt aptitude
-            apt list --installed $argv
-        case pacman
-            $package_manager -Qq $argv
-        case apk
-            $package_manager list $argv
-        case dnf
-            $package_manager list installed $argv
-        case '*'
-          logger 4 "$prefix No support package manager detected"
-    end
-end
-
-function source_list
-    detectos
-    switch $package_manager
-        case apt aptitude
-            cat /etc/apt/sources.list | grep --color=never deb
-            cat /etc/apt/sources.list.d/* | grep --color=never deb
-        case pacman
-            cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
-            cat /etc/pacman.conf | grep --color=never "Server ="
-        case apk
-            cat /etc/apk/repositories
-        case dnf
-            $package_manager repolist
-        case '*'
-            logger 4 "$prefix No support package manager detected"
-    end
-end
-
-function update
-    detectos
-    switch $package_manager
-        case apt aptitude
-            sudo $package_manager update $argv
-        case pacman
-            sudo $package_manager -Sy $argv
-        case apk
-            sudo $package_manager update $argv
-        case dnf
-            sudo $package_manager check-update $argv
+            sudo $package_manager clean all $argv
         case '*'
             logger 4 "$prefix No support package manager detected"
     end
@@ -226,17 +158,13 @@ function install
     end
 end
 
-function clean
+function search
     detectos
     switch $package_manager
-        case apt aptitude 
-            sudo $package_manager clean $argv
+        case apt aptitude apk dnf
+            $package_manager search $argv
         case pacman
-            sudo $package_manager -Scc $argv
-        case apk
-            logger 4 "$prefix No Such function in alpine apk"
-        case dnf
-            sudo $package_manager clean all $argv
+            $package_manager -Ss $argv
         case '*'
             logger 4 "$prefix No support package manager detected"
     end
@@ -260,15 +188,176 @@ function upgrade
     end
 end
 
-function search
+function purge
     detectos
     switch $package_manager
-        case apt aptitude apk dnf
-            $package_manager search $argv
+        case apt
+            sudo $package_manager purge $argv
+            sudo $package_manager autoremove --purge
+        case aptitude
+            sudo $package_manager purge $argv
         case pacman
-            $package_manager -Ss $argv
+            sudo $package_manager -Rn $argv
+            sudo $package_manager -Rn (pacman -Qtdq)
+        case apk
+            sudo $package_manager del $argv
+        case dnf
+            sudo $package_manager remove $argv
         case '*'
             logger 4 "$prefix No support package manager detected"
+    end
+end
+
+function list
+    detectos
+    switch $package_manager
+        case apt aptitude
+            apt list --installed $argv
+        case pacman
+            $package_manager -Qq $argv
+        case apk
+            $package_manager list $argv
+        case dnf
+            $package_manager list installed $argv
+        case '*'
+          logger 4 "$prefix No support package manager detected"
+    end
+end
+
+function update
+    detectos
+    switch $package_manager
+        case apt aptitude
+            sudo $package_manager update $argv
+        case pacman
+            sudo $package_manager -Sy $argv
+        case apk
+            sudo $package_manager update $argv
+        case dnf
+            sudo $package_manager check-update $argv
+        case '*'
+            logger 4 "$prefix No support package manager detected"
+    end
+end
+
+function source_list
+    detectos
+    switch $package_manager
+        case apt aptitude
+            cat /etc/apt/sources.list | grep --color=never deb
+            cat /etc/apt/sources.list.d/* | grep --color=never deb
+        case pacman
+            cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
+            cat /etc/pacman.conf | grep --color=never "Server ="
+        case apk
+            cat /etc/apk/repositories
+        case dnf
+            $package_manager repolist
+        case '*'
+            logger 4 "$prefix No support package manager detected"
+    end
+end
+
+function show
+    detectos
+    switch $package_manager
+        case apt aptitude
+            $package_manager show $argv
+        case pacman
+            $package_manager -Si $argv
+        case apk dnf
+            $package_manager info $argv
+        case '*'
+            logger 4 "$prefix No support package manager detected"
+    end
+end
+
+function detectos
+  #debian
+  if test -e /etc/debian_version
+    if test -e /usr/bin/aptitude
+      set -g package_manager aptitude
+    else
+      set -g package_manager apt
+    end
+  end
+  #archlinux
+  if test -e /etc/arch-release
+    set -g package_manager pacman
+  end
+  #alpine
+  if cat /etc/os-release | grep -q 'Alpine Linux'
+    set -g package_manager apk
+  end
+  #fedora
+  if test -e /etc/fedora-release
+    set -g package_manager dnf
+  end
+  logger 0 "Set backend as $package_manager"
+end
+
+function user_list
+    if ls -1qA ~/.ctpm/package_info/ | grep -q .
+        set_color red
+        echo ">Installed-UserLevel<"
+        set_color normal
+        cd ~/.ctpm/package_info/
+        list_menu *.info | sed 's/.info//g'
+    else
+        set_color red
+        echo ">Installed-UserLevel<"
+        set_color normal
+    end
+end
+
+function user_install
+    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as user level"
+    cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
+    echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_relver=$package_relver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    if [ -s src/unis_hooks ]
+        cat src/unis_hooks | tee -a ~/.ctpm/package_info/$package_name.unis >/dev/null
+        chmod +x ~/.ctpm/package_info/$package_name.unis
+    end
+    for src_file in (cat src/file_list)
+        set src_file_dirname (dirname $src_file)
+        if test -d $src_file_dirname
+        else
+            mkdir -p ~/.$src_file_dirname &>/dev/null
+        end
+        mv -f src$src_file ~/.$src_file &>/dev/null
+    end
+    if [ -s hooks ]
+        logger 0 "Running install hooks for $package_name"
+        chmod +x hooks
+        ./hooks
+    end
+end
+
+function user_purge
+    for package_ctpm in $argv
+        set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
+        if test -e ~/.ctpm/package_info/$package_ctpm
+            for src_file in (cat ~/.ctpm/package_info/$package_ctpm)
+                rm -rf ~/$src_file
+            end
+            if [ "$package_unis" = "1" ]
+                if test -e ~/.ctpm/package_info/$package_ctpm.unis
+                    ~/.ctpm/package_info/$package_ctpm.unis
+                end
+            end
+            rm ~/.ctpm/package_info/$package_ctpm
+            rm ~/.ctpm/package_info/$package_ctpm.info
+            if test -e ~/.ctpm/package_info/$package_ctpm.unis
+            rm ~/.ctpm/package_info/$package_ctpm.unis
+            end
+            logger 1 purged package:$package_ctpm
+        else
+            logger 4 "no info file of package:$package_ctpm,abort"
+        end
     end
 end
 
@@ -340,68 +429,30 @@ function extract
     end
 end
 
-function user_install
-    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as user level"
-    cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
-    echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_relver=$package_relver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
-    echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+function sys_install
+    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as sys level"
+    cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
+    echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_relver=$package_relver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_unis=$package_unis | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]
-        cat src/unis_hooks | tee -a ~/.ctpm/package_info/$package_name.unis >/dev/null
-        chmod +x ~/.ctpm/package_info/$package_name.unis
+        cat src/unis_hooks | sudo tee -a /var/lib/ctpm/package_info/$package_name.unis >/dev/null
+        sudo chmod +x /var/lib/ctpm/package_info/$package_name.unis
     end
     for src_file in (cat src/file_list)
         set src_file_dirname (dirname $src_file)
-        if test -d $src_file_dirname
+        if test -d "$src_file_dirname"
         else
-            mkdir -p ~/.$src_file_dirname &>/dev/null
+            sudo mkdir "$src_file_dirname" &>/dev/null
         end
-        mv -f src$src_file ~/.$src_file &>/dev/null
+        sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
         logger 0 "Running install hooks for $package_name"
-        chmod +x hooks
-        ./hooks
-    end
-end
-
-function user_list
-    if ls -1qA ~/.ctpm/package_info/ | grep -q .
-        set_color red
-        echo ">Installed-UserLevel<"
-        set_color normal
-        cd ~/.ctpm/package_info/
-        list_menu *.info | sed 's/.info//g'
-    else
-        set_color red
-        echo ">Installed-UserLevel<"
-        set_color normal
-    end
-end
-
-function user_purge
-    for package_ctpm in $argv
-        set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
-        if test -e ~/.ctpm/package_info/$package_ctpm
-            for src_file in (cat ~/.ctpm/package_info/$package_ctpm)
-                rm -rf ~/$src_file
-            end
-            if [ "$package_unis" = "1" ]
-                if test -e ~/.ctpm/package_info/$package_ctpm.unis
-                    ~/.ctpm/package_info/$package_ctpm.unis
-                end
-            end
-            rm ~/.ctpm/package_info/$package_ctpm
-            rm ~/.ctpm/package_info/$package_ctpm.info
-            if test -e ~/.ctpm/package_info/$package_ctpm.unis
-            rm ~/.ctpm/package_info/$package_ctpm.unis
-            end
-            logger 1 purged package:$package_ctpm
-        else
-            logger 4 "no info file of package:$package_ctpm,abort"
-        end
+        sudo chmod +x hooks
+        sudo ./hooks
     end
 end
 
@@ -443,40 +494,15 @@ function sys_purge
     end
 end
 
-function sys_install
-    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as sys level"
-    cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
-    echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
-    echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
-    echo package_relver=$package_relver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
-    echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
-    echo package_unis=$package_unis | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
-    if [ -s src/unis_hooks ]
-        cat src/unis_hooks | sudo tee -a /var/lib/ctpm/package_info/$package_name.unis >/dev/null
-        sudo chmod +x /var/lib/ctpm/package_info/$package_name.unis
-    end
-    for src_file in (cat src/file_list)
-        set src_file_dirname (dirname $src_file)
-        if test -d "$src_file_dirname"
-        else
-            sudo mkdir "$src_file_dirname" &>/dev/null
-        end
-        sudo mv -f src$src_file $src_file &>/dev/null
-    end
-    if [ -s hooks ]
-        logger 0 "Running install hooks for $package_name"
-        sudo chmod +x hooks
-        sudo ./hooks
-    end
-end
-
 function ctconfig_init
-    if test -d /etc/centerlinux/conf.d/
+    if test -e /etc/centerlinux/conf.d/ctpm.conf
     else
         set_color red
         echo "$prefix Detected First Launching,We need your password to create the config file"
         set_color normal
-        sudo mkdir -p /etc/centerlinux/conf.d/
+        if test -d /etc/centerlinux/conf.d/
+            sudo mkdir -p /etc/centerlinux/conf.d/
+        end
         sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
     end
 end
@@ -552,31 +578,7 @@ function grab
     end
 end
 
-function detectos
-  #debian
-  if test -e /etc/debian_version
-    if test -e /usr/bin/aptitude
-      set -g package_manager aptitude
-    else
-      set -g package_manager apt
-    end
-  end
-  #archlinux
-  if test -e /etc/arch-release
-    set -g package_manager pacman
-  end
-  #alpine
-  if cat /etc/os-release | grep -q 'Alpine Linux'
-    set -g package_manager apk
-  end
-  #fedora
-  if test -e /etc/fedora-release
-    set -g package_manager dnf
-  end
-  logger 0 "Set backend as $package_manager"
-end
-
-echo Build_Time_UTC=2022-01-09_04:51:29
+echo Build_Time_UTC=2022-01-09_06:13:22
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
