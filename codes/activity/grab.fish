@@ -10,24 +10,28 @@ function grab
         case upg
             grab upd
             logger 0 "Checking for update"
-            for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
-                set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
-                if test $package_relver_repo -gt $package_relver
-                    logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
-                    grab $ctpm_package
-                else
-                    logger 0 "$ctpm_package is the latest package,skip"
+            if ls -1qA ~/.ctpm/package_info/ | grep -q .
+                for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                    set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                    if test $package_relver_repo -gt $package_relver
+                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                        grab $ctpm_package
+                    else
+                        logger 0 "$ctpm_package is the latest package,skip"
+                    end
                 end
             end
-            for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
-                set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
-                if test $package_relver_repo -gt $package_relver
-                    logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
-                    grab $ctpm_package
-                else
-                    logger 0 "$ctpm_package is the latest package,skip"
+            if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
+                for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                    set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                    if test $package_relver_repo -gt $package_relver
+                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                        grab $ctpm_package
+                    else
+                        logger 0 "$ctpm_package is the latest package,skip"
+                    end
                 end
             end
         case l
