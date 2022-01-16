@@ -145,13 +145,14 @@ end
 function grab
     switch $argv[1]
         case upd
-            if sudo curl -s -L -o /var/lib/ctpm/world $ctpm_source/list
+            if sudo curl --progress-bar -L -o /var/lib/ctpm/world $ctpm_source/list
                 logger 1 "Package List downloaded"
             else
                 logger 4 "Failed to download package list from online repo,abort"
                 exit
             end
         case upg
+            grab upd
             logger 0 "Checking for update"
             for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
                 set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
@@ -184,7 +185,7 @@ function grab
         case '*'
             for ctpm_package in $argv
                 logger 0 "Grabbing $ctpm_package"
-                if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
+                if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
                         logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
@@ -577,7 +578,7 @@ function check_environment
     end
 end
 
-echo Build_Time_UTC=2022-01-16_01:19:30
+echo Build_Time_UTC=2022-01-16_01:47:01
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -586,7 +587,7 @@ else
     set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build3 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build4 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -640,7 +641,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build3"
+        echo "pomelo@build4"
         set_color normal
     case h help '*'
         help_echo

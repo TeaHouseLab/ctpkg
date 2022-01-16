@@ -1,13 +1,14 @@
 function grab
     switch $argv[1]
         case upd
-            if sudo curl -s -L -o /var/lib/ctpm/world $ctpm_source/list
+            if sudo curl --progress-bar -L -o /var/lib/ctpm/world $ctpm_source/list
                 logger 1 "Package List downloaded"
             else
                 logger 4 "Failed to download package list from online repo,abort"
                 exit
             end
         case upg
+            grab upd
             logger 0 "Checking for update"
             for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
                 set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
@@ -40,7 +41,7 @@ function grab
         case '*'
             for ctpm_package in $argv
                 logger 0 "Grabbing $ctpm_package"
-                if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
+                if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
                         logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
