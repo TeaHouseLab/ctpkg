@@ -14,7 +14,17 @@ function help_echo
              si(show info of a package)
              sc(source used)
              upd(update database)
-             upg(upgrade)"
+             upg(upgrade)
+             grab(download and install a package from online repo)
+                argv[2]:
+                  -Available:
+                      upd:update database
+                      l:list package in online repo
+                      s:search package in online repo
+                      xxx:the name of package
+                      For example:
+                      ctpkg grab l:list package
+                      ctpkg grab matcha-gtk-theme:install this package"
   echo " -argv[2+]:the package you want to do on"
   echo "--------------------------------------"
   set_color green
@@ -24,17 +34,7 @@ function help_echo
   echo "  -Available:
              i(install)
              p(purge)
-             l(list installed package)
-             grab(download and install a package from online repo)
-                argv[3]:
-                  -Available:
-                      upd:update database
-                      l:list package in online repo
-                      s:search package in online repo
-                      xxx:the name of package
-                  For example:
-                  ctpkg ctpm grab l:list package
-                  ctpkg ctpm grab matcha-gtk-theme:install this package"
+             l(list installed package)"
   echo " -argv[2+]:the package you want to change"
   echo "========================================"
 end

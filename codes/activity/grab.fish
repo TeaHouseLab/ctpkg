@@ -43,11 +43,11 @@ function grab
                 if curl -s -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
-                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again"
+                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
                         rm /tmp/$ctpm_package.ctpkg
                         exit
                     end
-                    logger 1 "package:$ctpm_package downloaded,installing..."
+                    logger 1 "package:$ctpm_package Downloaded,installing..."
                     cd /tmp
                     extract $ctpm_package.ctpkg
                     rm $ctpm_package.ctpkg

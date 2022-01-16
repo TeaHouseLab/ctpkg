@@ -16,10 +16,9 @@ function extract
             logger 4 "$package_ctpm not found,abort"
             exit
         end
-        cp $package_ctpm /tmp/ctpm
+        tar xf $package_ctpm -C /tmp/ctpm
         cd /tmp/ctpm
-        logger 0 'Extracting the package'
-        tar xf $package_ctpm
+        logger 0 'Extracted package'
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
         set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
