@@ -16,6 +16,9 @@ function sys_install
         else
             sudo mkdir "$src_file_dirname" &>/dev/null
         end
+        if test -e $src_file
+            sudo rm -rf $src_file
+        end
         sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]

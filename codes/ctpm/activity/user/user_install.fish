@@ -16,6 +16,9 @@ function user_install
         else
             mkdir -p ~/.$src_file_dirname &>/dev/null
         end
+        if test -e ~/.$src_file
+            rm -rf ~/.$src_file
+        end
         mv -f src$src_file ~/.$src_file &>/dev/null
     end
     if [ -s hooks ]

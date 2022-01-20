@@ -6,7 +6,7 @@ else
     set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build5 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build8 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -60,7 +60,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build5"
+        echo "pomelo@build8"
         set_color normal
     case h help '*'
         help_echo

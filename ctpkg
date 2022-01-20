@@ -393,6 +393,9 @@ function user_install
         else
             mkdir -p ~/.$src_file_dirname &>/dev/null
         end
+        if test -e ~/.$src_file
+            rm -rf ~/.$src_file
+        end
         mv -f src$src_file ~/.$src_file &>/dev/null
     end
     if [ -s hooks ]
@@ -443,13 +446,17 @@ function ctpm_show
             echo "-----------"
         end
         if test -e ~/.ctpm/package_info/$package_ctpm.info
-            set package_level (sed -n '/package_level=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
             set package_name (sed -n '/package_name=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_name=//g')
             set package_ver (sed -n '/package_ver=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_ver=//g')
+            set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_relver=//g')
+            set package_level (sed -n '/package_level=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
+            set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
             echo "-----------"
-            echo "package_name: $package_name"
-            echo "package_ver: $package_ver"
-            echo "package_level: $package_level"
+            echo "package name: $package_name"
+            echo "package software ver: $package_ver"
+            echo "package relver:$package_relver"
+            echo "package level: $package_level"
+            echo "package unis hook: $package_unis"
             echo "-----------"
         end
     end
@@ -511,6 +518,9 @@ function sys_install
         else
             sudo mkdir "$src_file_dirname" &>/dev/null
         end
+        if test -e $src_file
+            sudo rm -rf $src_file
+        end
         sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
@@ -565,6 +575,7 @@ function ctconfig_init
         echo "$prefix Detected First Launching,We need your password to create the config file"
         set_color normal
         if test -d /etc/centerlinux/conf.d/
+        else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
         sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
@@ -582,7 +593,7 @@ function check_environment
     end
 end
 
-echo Build_Time_UTC=2022-01-16_02:39:18
+echo Build_Time_UTC=2022-01-20_05:22:52
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -591,7 +602,7 @@ else
     set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build5 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build8 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -645,7 +656,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build5"
+        echo "pomelo@build8"
         set_color normal
     case h help '*'
         help_echo
