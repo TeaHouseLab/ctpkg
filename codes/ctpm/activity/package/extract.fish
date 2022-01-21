@@ -29,6 +29,9 @@ function extract
                 user_install
             case sys
                 sys_install
+            case h '*'
+                logger 4 "Unknown package level,abort"
+                exit
         end
         cd $recudir
         rm -rf ctpm

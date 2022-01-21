@@ -493,6 +493,9 @@ function extract
                 user_install
             case sys
                 sys_install
+            case h '*'
+                logger 4 "Unknown package level,abort"
+                exit
         end
         cd $recudir
         rm -rf ctpm
@@ -578,7 +581,7 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
+        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
     end
 end
 
@@ -593,7 +596,7 @@ function check_environment
     end
 end
 
-echo Build_Time_UTC=2022-01-20_05:22:52
+echo Build_Time_UTC=2022-01-21_02:05:17
 set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
@@ -602,7 +605,7 @@ else
     set ctpm_source https://cdngit.ruzhtw.top/ctpm/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build8 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build10 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -646,9 +649,13 @@ switch $argv[1]
                         sys_purge $argv[4..-1]
                     case user
                         user_purge $argv[4..-1]
+                    case h help '*'
+                        help_echo
                 end
             case ss
                 ctpm_show $argv[3..-1]
+            case h help '*'
+                help_echo
         end
     case install
         install_script ctpkg
@@ -656,7 +663,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build8"
+        echo "pomelo@build10"
         set_color normal
     case h help '*'
         help_echo

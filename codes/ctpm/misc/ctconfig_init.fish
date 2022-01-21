@@ -8,6 +8,6 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        sudo sh -c "echo "source=https://cdngit.ruzhtw.top/ctpm/" > /etc/centerlinux/conf.d/ctpm.conf"
+        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
     end
 end
