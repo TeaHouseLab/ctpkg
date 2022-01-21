@@ -2,7 +2,6 @@ set -lx prefix [ctpkg]
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
 if [ "$ctpm_source" = "" ]
-else
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
