@@ -3,7 +3,7 @@ ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
 if [ "$ctpm_source" = "" ]
 else
-    set ctpm_source https://cdngit.ruzhtw.top/ctpm/
+    set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
 echo "$prefix CenterLinux Package Manager Version pomelo@build10 | TeaHouseLab at ruzhtw.top"
