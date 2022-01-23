@@ -1,11 +1,12 @@
 set -lx prefix [ctpkg]
+depcheck file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
 if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build10 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build11 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -63,7 +64,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build10"
+        echo "pomelo@build11"
         set_color normal
     case h help '*'
         help_echo

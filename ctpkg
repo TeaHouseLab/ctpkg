@@ -337,6 +337,49 @@ function show
     end
 end
 
+function ctconfig_init
+    if test -e /etc/centerlinux/conf.d/ctpm.conf
+    else
+        set_color red
+        echo "$prefix Detected First Launching,We need your password to create the config file"
+        set_color normal
+        if test -d /etc/centerlinux/conf.d/
+        else
+            sudo mkdir -p /etc/centerlinux/conf.d/
+        end
+        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
+    end
+    if test -d /var/lib/ctpm/package_info
+    else
+        logger 3 'Creating ctpm package info database'
+        sudo mkdir -p /var/lib/ctpm/package_info
+    end
+    if test -d ~/.ctpm/package_info
+    else
+        logger 3 'Creating ctpm user package info database'
+        mkdir -p ~/.ctpm/package_info
+    end
+end
+
+function depcheck
+    set -lx deps_ok 1
+    for deps in $argv
+        if command -q -v $deps
+        else
+            set deps_ok 0
+            if test -z "$dep_lost"
+                set deps_lost "$deps $deps_lost"
+            else
+                set deps_lost "$deps"
+            end
+        end
+    end
+    if test "$deps_ok" -eq 0
+        logger 4 "Please install "$deps_lost"to run this programm"
+        exit
+    end
+end
+
 function detectos
   #debian
   if test -e /etc/debian_version
@@ -465,7 +508,6 @@ end
 function extract
     set -lx recudir (pwd)
     set -lx package_ctpm
-    check_environment
     if test -d /tmp/ctpm
     else
         mkdir /tmp/ctpm
@@ -571,40 +613,16 @@ function sys_purge
     end
 end
 
-function ctconfig_init
-    if test -e /etc/centerlinux/conf.d/ctpm.conf
-    else
-        set_color red
-        echo "$prefix Detected First Launching,We need your password to create the config file"
-        set_color normal
-        if test -d /etc/centerlinux/conf.d/
-        else
-            sudo mkdir -p /etc/centerlinux/conf.d/
-        end
-        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
-    end
-end
-
-function check_environment
-    if test -d /var/lib/ctpm/package_info
-    else
-        sudo mkdir -p /var/lib/ctpm/package_info
-    end
-    if test -d ~/.ctpm/package_info
-    else
-        mkdir -p ~/.ctpm/package_info
-    end
-end
-
-echo Build_Time_UTC=2022-01-21_02:08:25
+echo Build_Time_UTC=2022-01-23_07:59:12
 set -lx prefix [ctpkg]
+depcheck file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
 if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build10 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version pomelo@build11 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -662,7 +680,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build10"
+        echo "pomelo@build11"
         set_color normal
     case h help '*'
         help_echo

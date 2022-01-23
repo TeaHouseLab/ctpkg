@@ -10,4 +10,14 @@ function ctconfig_init
         end
         sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
     end
+    if test -d /var/lib/ctpm/package_info
+    else
+        logger 3 'Creating ctpm package info database'
+        sudo mkdir -p /var/lib/ctpm/package_info
+    end
+    if test -d ~/.ctpm/package_info
+    else
+        logger 3 'Creating ctpm user package info database'
+        mkdir -p ~/.ctpm/package_info
+    end
 end

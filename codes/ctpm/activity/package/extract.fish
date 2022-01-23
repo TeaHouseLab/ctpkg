@@ -1,7 +1,6 @@
 function extract
     set -lx recudir (pwd)
     set -lx package_ctpm
-    check_environment
     if test -d /tmp/ctpm
     else
         mkdir /tmp/ctpm
