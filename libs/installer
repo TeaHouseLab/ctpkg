@@ -1,6 +1,6 @@
-function install_script
+function install
 set installname $argv[1]
-  set dir (realpath (dirname (status -f)))
+  set dir (pwd)
   set filename (status --current-filename)
   chmod +x $dir/$filename
   sudo cp $dir/$filename /usr/bin/$installname
@@ -8,7 +8,7 @@ set installname $argv[1]
   echo "$prefix Installed"
   set_color normal
 end
-function uninstall_script
+function uninstall
 set installname $argv[1]
   sudo rm /usr/bin/$installname
   set_color green

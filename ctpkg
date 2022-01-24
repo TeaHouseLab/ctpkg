@@ -63,7 +63,7 @@ function logger-debug
 end
 function logger-success
   set_color green
-  echo "$prefix [Successed] $argv[1..-1]"
+  echo "$prefix [Succeeded] $argv[1..-1]"
   set_color normal
 end
 function logger -d "a lib to print msg quickly"
@@ -82,35 +82,49 @@ end
 end
 
 function checkdependence
-  if test -e $argv
-    echo -e "\033[32m[checkdependence]check passed - $argv exist\033[0m"
-  else
-    echo -e "\033[0;31m[checkdependence]check failed - plz install $argv\033[0m"
+set 34ylli8_deps_ok 1
+for 34ylli8_deps in $argv
+    if command -q -v $34ylli8_deps
+    else
+        set 34ylli8_deps_ok 0
+        if test -z "$34ylli8_dep_lost"
+            set 34ylli8_deps_lost "$34ylli8_deps $34ylli8_deps_lost"
+        else
+            set 34ylli8_deps_lost "$34ylli8_deps"
+        end
+    end
+end
+if test "$34ylli8_deps_ok" -eq 0
+    set_color red
+    echo "$prefix [error] "Please install "$34ylli8_deps_lost"to run this program""
+    set_color normal
     exit
-  end
+end
 end
 function checknetwork
   if curl -s -L $argv[1] | grep -q $argv[2]
-    echo -e "\033[32m[checknetwork]check passed - u`ve connected to $argv[1]\033[0m"
   else
-    echo -e "\033[0;31m[checknetwork]check failed - check your network connection\033[0m"
+    set_color red
+    echo "$prefix [error] [checknetwork] check failed - check your network connection"
+    set_color normal
   end
 end
 function dir_exist
   if test -d $argv[1]
-    echo -e "\033[32m[checkdir]check passed - dir $argv[1] exist\033[0m"
   else
-    echo -e "\033[0;31m[checkdir]check failed - dir $argv[1] doesn't exist,going to makr one\033[0m"
+    set_color red
+    echo "$prefix [error] [checkdir] check failed - dir $argv[1] doesn't exist,going to makr one"
+    set_color normal
     mkdir $argv[1]
   end
 end
 function list_menu
-ls $argv | sed '\~//~d'
+ls $argv | sed ~//~d
 end
 
-function install_script
+function install
 set installname $argv[1]
-  set dir (realpath (dirname (status -f)))
+  set dir (pwd)
   set filename (status --current-filename)
   chmod +x $dir/$filename
   sudo cp $dir/$filename /usr/bin/$installname
@@ -118,7 +132,7 @@ set installname $argv[1]
   echo "$prefix Installed"
   set_color normal
 end
-function uninstall_script
+function uninstall
 set installname $argv[1]
   sudo rm /usr/bin/$installname
   set_color green
@@ -613,7 +627,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-01-23_07:59:12
+echo Build_Time_UTC=2022-01-24_02:57:44
 set -lx prefix [ctpkg]
 depcheck file curl tar rm mv
 ctconfig_init
@@ -622,7 +636,7 @@ if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version pomelo@build11 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version BlackDeath@build1 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -680,7 +694,7 @@ switch $argv[1]
         uninstall_script ctpkg
     case v version
         set_color yellow
-        echo "pomelo@build11"
+        echo "BlackDeath@build1"
         set_color normal
     case h help '*'
         help_echo
