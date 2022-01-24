@@ -1,5 +1,5 @@
 set -lx prefix [ctpkg]
-depcheck file curl tar rm mv
+checkdependence file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
 if [ "$ctpm_source" = "" ]
