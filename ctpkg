@@ -119,10 +119,10 @@ function dir_exist
   end
 end
 function list_menu
-ls $argv | sed ~//~d
+ls $argv | sed '\~//~d'
 end
 
-function install
+function install_script
 set installname $argv[1]
   set dir (pwd)
   set filename (status --current-filename)
@@ -132,7 +132,7 @@ set installname $argv[1]
   echo "$prefix Installed"
   set_color normal
 end
-function uninstall
+function uninstall_script
 set installname $argv[1]
   sudo rm /usr/bin/$installname
   set_color green
@@ -627,7 +627,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-01-24_02:59:44
+echo Build_Time_UTC=2022-01-24_03:41:45
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -636,7 +636,7 @@ if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version BlackDeath@build1 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version BlackDeath@build3 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -693,9 +693,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        set_color yellow
-        echo "BlackDeath@build1"
-        set_color normal
+        logger 0 "BlackDeath@build3"
     case h help '*'
         help_echo
 end

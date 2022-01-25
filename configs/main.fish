@@ -6,7 +6,7 @@ if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
 set_color cyan
-echo "$prefix CenterLinux Package Manager Version BlackDeath@build1 | TeaHouseLab at ruzhtw.top"
+echo "$prefix CenterLinux Package Manager Version BlackDeath@build3 | TeaHouseLab at ruzhtw.top"
 set_color normal
 switch $argv[1]
     case c
@@ -63,9 +63,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        set_color yellow
-        echo "BlackDeath@build1"
-        set_color normal
+        logger 0 "BlackDeath@build3"
     case h help '*'
         help_echo
 end

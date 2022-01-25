@@ -36,5 +36,5 @@ function dir_exist
   end
 end
 function list_menu
-ls $argv | sed ~//~d
+ls $argv | sed '\~//~d'
 end
