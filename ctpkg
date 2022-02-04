@@ -11,6 +11,7 @@ function help_echo
   echo "  -Available:c(clean cache)
              i(install)
              p(purge)
+             pg(purge with groups)
              s(search)
              l(list installed package)
              si(show info of a package)
@@ -141,18 +142,19 @@ set installname $argv[1]
 end
 
 function clean
-    detectos
     switch $package_manager
-        case apt aptitude 
+        case apt aptitude
             sudo $package_manager clean $argv
         case pacman
             sudo $package_manager -Scc $argv
         case apk
-            logger 4 "$prefix No Such function in alpine apk"
+            logger 4 "No Such function in alpine apk"
         case dnf
             sudo $package_manager clean all $argv
+        case xbps
+            sudo $package_manager-remove -O $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
@@ -222,7 +224,6 @@ function grab
 end
 
 function install
-    detectos
     switch $package_manager
         case apt aptitude
             sudo $package_manager install $argv
@@ -232,27 +233,33 @@ function install
             sudo $package_manager add $argv
         case dnf
             sudo $package_manager install $argv
+        case xbps
+            sudo $package_manager-install $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function search
-    detectos
     switch $package_manager
         case apt aptitude apk dnf
             $package_manager search $argv
         case pacman
             $package_manager -Ss $argv
+        case xbps
+            $package_manager-query -Rs $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function upgrade
-    detectos
     switch $package_manager
-        case apt aptitude
+        case apt
+            sudo $package_manager update
+            sudo $package_manager upgrade $argv
+            sudo $package_manager autoremove --purge -y
+        case aptitude
             sudo $package_manager update $argv
             sudo $package_manager upgrade $argv
         case pacman
@@ -262,13 +269,14 @@ function upgrade
             sudo $package_manager upgrade $argv
         case dnf
             sudo $package_manager update $argv
+        case xbps
+            sudo $package_manager-install -Su
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function purge
-    detectos
     switch $package_manager
         case apt
             sudo $package_manager purge $argv
@@ -282,13 +290,14 @@ function purge
             sudo $package_manager del $argv
         case dnf
             sudo $package_manager remove $argv
+        case xbps
+            sudo $package_manager-remove -R $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function list
-    detectos
     switch $package_manager
         case apt aptitude
             apt list --installed $argv
@@ -298,13 +307,14 @@ function list
             $package_manager list $argv
         case dnf
             $package_manager list installed $argv
+        case xbps
+            $package_manager-query -l $argv
         case '*'
-          logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function update
-    detectos
     switch $package_manager
         case apt aptitude
             sudo $package_manager update $argv
@@ -314,31 +324,33 @@ function update
             sudo $package_manager update $argv
         case dnf
             sudo $package_manager check-update $argv
+        case xbps
+            sudo $package_manager-install -S $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function source_list
-    detectos
     switch $package_manager
         case apt aptitude
             cat /etc/apt/sources.list | grep --color=never deb
             cat /etc/apt/sources.list.d/* | grep --color=never deb
         case pacman
             cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
-            cat /etc/pacman.conf | grep --color=never "Server ="
+            cat /etc/pacman.conf | grep --color=never "Server =" 
         case apk
-            cat /etc/apk/repositories
+            cat /etc/apk/repositories $argv
         case dnf
-            $package_manager repolist
+            $package_manager repolist $argv
+        case xbps
+            $package_manager-query -L $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end
 
 function show
-    detectos
     switch $package_manager
         case apt aptitude
             $package_manager show $argv
@@ -346,13 +358,34 @@ function show
             $package_manager -Si $argv
         case apk dnf
             $package_manager info $argv
+        case xbps
+            $package_manager-query -RS $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
+    end
+end
+
+function autoremove
+    switch $package_manager
+        case apt
+            sudo $package_manager autoremove --purge $argv
+        case aptitude
+            sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
+        case pacman
+            sudo $package_manager -Rn (pacman -Qtdq) $argv
+        case apk
+            logger 4 'No Such function in alpine apk'
+        case dnf
+            sudo $package_manager autoremove $argv
+        case xbps
+            sudo $package_manager-remove -Oo $argv
+        case '*'
+            logger 4 "No support package manager detected"
     end
 end
 
 function ctconfig_init
-    if test -e /etc/centerlinux/conf.d/ctpm.conf
+    if test -e /etc/centerlinux/conf.d/ctpkg.conf
     else
         set_color red
         echo "$prefix Detected First Launching,We need your password to create the config file"
@@ -361,7 +394,8 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
+        echo "source=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+        echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
     end
     if test -d /var/lib/ctpm/package_info
     else
@@ -372,25 +406,6 @@ function ctconfig_init
     else
         logger 3 'Creating ctpm user package info database'
         mkdir -p ~/.ctpm/package_info
-    end
-end
-
-function depcheck
-    set -lx deps_ok 1
-    for deps in $argv
-        if command -q -v $deps
-        else
-            set deps_ok 0
-            if test -z "$dep_lost"
-                set deps_lost "$deps $deps_lost"
-            else
-                set deps_lost "$deps"
-            end
-        end
-    end
-    if test "$deps_ok" -eq 0
-        logger 4 "Please install "$deps_lost"to run this programm"
-        exit
     end
 end
 
@@ -415,7 +430,10 @@ function detectos
   if test -e /etc/fedora-release
     set -g package_manager dnf
   end
-  logger 0 "Set backend as $package_manager"
+  #voidlinux
+  if cat /etc/os-release | grep -q 'void'
+    set -g package_manager xbps
+  end
 end
 
 function user_list
@@ -438,10 +456,11 @@ function user_install
     echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_relver=$package_relver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_packager=$package_packager | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]
-        cat src/unis_hooks | tee -a ~/.ctpm/package_info/$package_name.unis >/dev/null
+        cat src/unis_hooks | tee ~/.ctpm/package_info/$package_name.unis >/dev/null
         chmod +x ~/.ctpm/package_info/$package_name.unis
     end
     for src_file in (cat src/file_list)
@@ -492,12 +511,14 @@ function ctpm_show
             set package_name (sed -n '/package_name=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_name=//g')
             set package_ver (sed -n '/package_ver=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_ver=//g')
             set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_relver=//g')
+            set package_packager (sed -n '/package_packager=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_packager=//g')
             set package_level (sed -n '/package_level=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
             set package_unis (sed -n '/package_unis=/'p /var/lib/ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
             echo "-----------"
             echo "package name: $package_name"
             echo "package software ver: $package_ver"
             echo "package relver:$package_relver"
+            echo "package packager:$package_packager"
             echo "package level: $package_level"
             echo "package unis hook: $package_unis"
             echo "-----------"
@@ -506,12 +527,14 @@ function ctpm_show
             set package_name (sed -n '/package_name=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_name=//g')
             set package_ver (sed -n '/package_ver=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_ver=//g')
             set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_relver=//g')
+            set package_packager (sed -n '/package_packager=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_packager=//g')
             set package_level (sed -n '/package_level=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_level=//g')
             set package_unis (sed -n '/package_unis=/'p ~/.ctpm/package_info/$package_ctpm.info | sed 's/package_unis=//g')
             echo "-----------"
             echo "package name: $package_name"
             echo "package software ver: $package_ver"
             echo "package relver:$package_relver"
+            echo "package packager:$package_packager"
             echo "package level: $package_level"
             echo "package unis hook: $package_unis"
             echo "-----------"
@@ -542,6 +565,7 @@ function extract
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
         set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
+        set -lx package_packager (sed -n '/package_packager=/'p ctpm_pkg_info | sed 's/package_packager=//g')
         set -lx package_level (sed -n '/package_level=/'p ctpm_pkg_info | sed 's/package_level=//g')
         set -lx package_unis (sed -n '/package_unis=/'p ctpm_pkg_info | sed 's/package_unis=//g')
         switch $package_level
@@ -565,10 +589,11 @@ function sys_install
     echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_relver=$package_relver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_packager=$package_packager | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_unis=$package_unis | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]
-        cat src/unis_hooks | sudo tee -a /var/lib/ctpm/package_info/$package_name.unis >/dev/null
+        cat src/unis_hooks | sudo tee /var/lib/ctpm/package_info/$package_name.unis >/dev/null
         sudo chmod +x /var/lib/ctpm/package_info/$package_name.unis
     end
     for src_file in (cat src/file_list)
@@ -627,17 +652,26 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-01-24_03:41:45
+echo Build_Time_UTC=2022-01-31_04:26:47
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
-set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
+set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
+set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
 if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
-set_color cyan
-echo "$prefix CenterLinux Package Manager Version BlackDeath@build3 | TeaHouseLab at ruzhtw.top"
-set_color normal
+if [ "$package_manager" = "" ]
+    detectos
+end
+argparse -i -n $prefix 's/ctsource=' 'b/ctbackend=' -- $argv
+if set -q _flag_ctbackend
+    set -g package_manager $_flag_ctbackend
+end
+if set -q _flag_ctsource
+    set ctpm_source $_flag_ctsource
+end
+logger 0 "Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
@@ -648,6 +682,8 @@ switch $argv[1]
         install $argv[2..-1]
     case p
         purge $argv[2..-1]
+    case pg
+        autoremove $argv[2..-1]
     case s
         search $argv[2..-1]
     case l
@@ -693,11 +729,8 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "BlackDeath@build3"
+        logger 0 "CenterLinux Package Manager Version Begonia@build3 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
 set -e package_manager
-set_color cyan
-echo "$prefix Done"
-set_color normal

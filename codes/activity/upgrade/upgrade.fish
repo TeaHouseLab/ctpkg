@@ -1,7 +1,10 @@
 function upgrade
-    detectos
     switch $package_manager
-        case apt aptitude
+        case apt
+            sudo $package_manager update
+            sudo $package_manager upgrade $argv
+            sudo $package_manager autoremove --purge -y
+        case aptitude
             sudo $package_manager update $argv
             sudo $package_manager upgrade $argv
         case pacman
@@ -11,7 +14,9 @@ function upgrade
             sudo $package_manager upgrade $argv
         case dnf
             sudo $package_manager update $argv
+        case xbps
+            sudo $package_manager-install -Su
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

@@ -1,5 +1,4 @@
 function show
-    detectos
     switch $package_manager
         case apt aptitude
             $package_manager show $argv
@@ -7,7 +6,9 @@ function show
             $package_manager -Si $argv
         case apk dnf
             $package_manager info $argv
+        case xbps
+            $package_manager-query -RS $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

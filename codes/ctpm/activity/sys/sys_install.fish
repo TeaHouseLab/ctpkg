@@ -4,10 +4,11 @@ function sys_install
     echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_relver=$package_relver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
+    echo package_packager=$package_packager | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_unis=$package_unis | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]
-        cat src/unis_hooks | sudo tee -a /var/lib/ctpm/package_info/$package_name.unis >/dev/null
+        cat src/unis_hooks | sudo tee /var/lib/ctpm/package_info/$package_name.unis >/dev/null
         sudo chmod +x /var/lib/ctpm/package_info/$package_name.unis
     end
     for src_file in (cat src/file_list)

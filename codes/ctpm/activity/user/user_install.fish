@@ -4,10 +4,11 @@ function user_install
     echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_relver=$package_relver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
+    echo package_packager=$package_packager | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_level=$package_level | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_unis=$package_unis | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
     if [ -s src/unis_hooks ]
-        cat src/unis_hooks | tee -a ~/.ctpm/package_info/$package_name.unis >/dev/null
+        cat src/unis_hooks | tee ~/.ctpm/package_info/$package_name.unis >/dev/null
         chmod +x ~/.ctpm/package_info/$package_name.unis
     end
     for src_file in (cat src/file_list)

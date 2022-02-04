@@ -1,5 +1,4 @@
 function list
-    detectos
     switch $package_manager
         case apt aptitude
             apt list --installed $argv
@@ -9,7 +8,9 @@ function list
             $package_manager list $argv
         case dnf
             $package_manager list installed $argv
+        case xbps
+            $package_manager-query -l $argv
         case '*'
-          logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

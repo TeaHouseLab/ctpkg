@@ -1,5 +1,4 @@
 function install
-    detectos
     switch $package_manager
         case apt aptitude
             sudo $package_manager install $argv
@@ -9,7 +8,9 @@ function install
             sudo $package_manager add $argv
         case dnf
             sudo $package_manager install $argv
+        case xbps
+            sudo $package_manager-install $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

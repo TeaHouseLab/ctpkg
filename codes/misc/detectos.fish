@@ -19,5 +19,8 @@ function detectos
   if test -e /etc/fedora-release
     set -g package_manager dnf
   end
-  logger 0 "Set backend as $package_manager"
+  #voidlinux
+  if cat /etc/os-release | grep -q 'void'
+    set -g package_manager xbps
+  end
 end

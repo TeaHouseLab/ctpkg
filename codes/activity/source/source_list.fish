@@ -1,17 +1,18 @@
 function source_list
-    detectos
     switch $package_manager
         case apt aptitude
             cat /etc/apt/sources.list | grep --color=never deb
             cat /etc/apt/sources.list.d/* | grep --color=never deb
         case pacman
             cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
-            cat /etc/pacman.conf | grep --color=never "Server ="
+            cat /etc/pacman.conf | grep --color=never "Server =" 
         case apk
-            cat /etc/apk/repositories
+            cat /etc/apk/repositories $argv
         case dnf
-            $package_manager repolist
+            $package_manager repolist $argv
+        case xbps
+            $package_manager-query -L $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

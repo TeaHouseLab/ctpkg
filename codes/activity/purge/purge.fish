@@ -1,5 +1,4 @@
 function purge
-    detectos
     switch $package_manager
         case apt
             sudo $package_manager purge $argv
@@ -13,7 +12,9 @@ function purge
             sudo $package_manager del $argv
         case dnf
             sudo $package_manager remove $argv
+        case xbps
+            sudo $package_manager-remove -R $argv
         case '*'
-            logger 4 "$prefix No support package manager detected"
+            logger 4 "No support package manager detected"
     end
 end

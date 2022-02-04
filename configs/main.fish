@@ -1,13 +1,22 @@
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
-set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpm.conf | sed 's/source=//g')
+set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
+set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
 if [ "$ctpm_source" = "" ]
     set ctpm_source https://ctpm.ruzhtw.top/
 end
-set_color cyan
-echo "$prefix CenterLinux Package Manager Version BlackDeath@build3 | TeaHouseLab at ruzhtw.top"
-set_color normal
+if [ "$package_manager" = "" ]
+    detectos
+end
+argparse -i -n $prefix 's/ctsource=' 'b/ctbackend=' -- $argv
+if set -q _flag_ctbackend
+    set -g package_manager $_flag_ctbackend
+end
+if set -q _flag_ctsource
+    set ctpm_source $_flag_ctsource
+end
+logger 0 "Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
@@ -18,6 +27,8 @@ switch $argv[1]
         install $argv[2..-1]
     case p
         purge $argv[2..-1]
+    case pg
+        autoremove $argv[2..-1]
     case s
         search $argv[2..-1]
     case l
@@ -63,11 +74,8 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "BlackDeath@build3"
+        logger 0 "CenterLinux Package Manager Version Begonia@build3 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
 set -e package_manager
-set_color cyan
-echo "$prefix Done"
-set_color normal

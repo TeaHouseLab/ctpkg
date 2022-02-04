@@ -1,5 +1,5 @@
 function ctconfig_init
-    if test -e /etc/centerlinux/conf.d/ctpm.conf
+    if test -e /etc/centerlinux/conf.d/ctpkg.conf
     else
         set_color red
         echo "$prefix Detected First Launching,We need your password to create the config file"
@@ -8,7 +8,8 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        sudo sh -c "echo "source=https://ctpm.ruzhtw.top/" > /etc/centerlinux/conf.d/ctpm.conf"
+        echo "source=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+        echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
     end
     if test -d /var/lib/ctpm/package_info
     else
