@@ -9,7 +9,7 @@ function help_echo
   echo "  -Available:c(clean cache)
              i(install)
              p(purge)
-             pg(purge with groups)
+             pg(purge with groups,when use it without args,perform an autoremove)
              s(search)
              l(list installed package)
              si(show info of a package)

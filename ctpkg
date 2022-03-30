@@ -11,7 +11,7 @@ function help_echo
   echo "  -Available:c(clean cache)
              i(install)
              p(purge)
-             pg(purge with groups)
+             pg(purge with groups,when use it without args,perform an autoremove)
              s(search)
              l(list installed package)
              si(show info of a package)
@@ -141,18 +141,35 @@ set installname $argv[1]
   set_color normal
 end
 
-function clean
+function search
     switch $package_manager
-        case apt aptitude
-            sudo $package_manager clean $argv
+        case apt aptitude apk dnf
+            $package_manager search $argv
         case pacman
-            sudo $package_manager -Scc $argv
-        case apk
-            logger 4 "No Such function in alpine apk"
-        case dnf
-            sudo $package_manager clean all $argv
+            $package_manager -Ss $argv
         case xbps
-            sudo $package_manager-remove -O $argv
+            $package_manager-query -Rs $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function purge
+    switch $package_manager
+        case apt
+            sudo $package_manager purge $argv
+            sudo $package_manager autoremove --purge
+        case aptitude
+            sudo $package_manager purge $argv
+        case pacman
+            sudo $package_manager -Rn $argv
+            sudo $package_manager -Rn (pacman -Qtdq)
+        case apk
+            sudo $package_manager del $argv
+        case dnf
+            sudo $package_manager remove $argv
+        case xbps
+            sudo $package_manager-remove -R $argv
         case '*'
             logger 4 "No support package manager detected"
     end
@@ -223,36 +240,40 @@ function grab
     end
 end
 
-function install
+function clean
     switch $package_manager
         case apt aptitude
-            sudo $package_manager install $argv
+            sudo $package_manager clean $argv
         case pacman
-            sudo $package_manager -S $argv
+            sudo $package_manager -Scc $argv
         case apk
-            sudo $package_manager add $argv
+            logger 4 "No Such function in alpine apk"
         case dnf
-            sudo $package_manager install $argv
+            sudo $package_manager clean all $argv
         case xbps
-            sudo $package_manager-install $argv
+            sudo $package_manager-remove -O $argv
         case '*'
             logger 4 "No support package manager detected"
     end
 end
 
-function search
+function reinstall
     switch $package_manager
-        case apt aptitude apk dnf
-            $package_manager search $argv
-        case pacman
-            $package_manager -Ss $argv
-        case xbps
-            $package_manager-query -Rs $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
+    case apt aptitude
+        sudo $package_manager reinstall $argv
+    case pacman
+        sudo $package_manager -S $argv
+    case apk
+        sudo $package_manager dev $argv
+        sudo $package_manager add $argv
+    case dnf
+        sudo $package_manager reinstall $argv
+    case xbps
+        sudo $package_manager-install -f $argv
+    case '*'
+        logger 4 "No support package manager detected"
 end
-
+end
 function upgrade
     switch $package_manager
         case apt
@@ -276,39 +297,35 @@ function upgrade
     end
 end
 
-function purge
+function show
     switch $package_manager
-        case apt
-            sudo $package_manager purge $argv
-            sudo $package_manager autoremove --purge
-        case aptitude
-            sudo $package_manager purge $argv
+        case apt aptitude
+            $package_manager show $argv
         case pacman
-            sudo $package_manager -Rn $argv
-            sudo $package_manager -Rn (pacman -Qtdq)
-        case apk
-            sudo $package_manager del $argv
-        case dnf
-            sudo $package_manager remove $argv
+            $package_manager -Si $argv
+        case apk dnf
+            $package_manager info $argv
         case xbps
-            sudo $package_manager-remove -R $argv
+            $package_manager-query -RS $argv
         case '*'
             logger 4 "No support package manager detected"
     end
 end
 
-function list
+function autoremove
     switch $package_manager
-        case apt aptitude
-            apt list --installed $argv
+        case apt
+            sudo $package_manager autoremove --purge $argv
+        case aptitude
+            sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
         case pacman
-            $package_manager -Qq $argv
+            sudo $package_manager -Rn (pacman -Qtdq) $argv
         case apk
-            $package_manager list $argv
+            logger 4 'No Such function in alpine apk'
         case dnf
-            $package_manager list installed $argv
+            sudo $package_manager autoremove $argv
         case xbps
-            $package_manager-query -l $argv
+            sudo $package_manager-remove -Oo $argv
         case '*'
             logger 4 "No support package manager detected"
     end
@@ -350,35 +367,35 @@ function source_list
     end
 end
 
-function show
+function list
     switch $package_manager
         case apt aptitude
-            $package_manager show $argv
+            apt list --installed $argv
         case pacman
-            $package_manager -Si $argv
-        case apk dnf
-            $package_manager info $argv
+            $package_manager -Qq $argv
+        case apk
+            $package_manager list $argv
+        case dnf
+            $package_manager list installed $argv
         case xbps
-            $package_manager-query -RS $argv
+            $package_manager-query -l $argv
         case '*'
             logger 4 "No support package manager detected"
     end
 end
 
-function autoremove
+function install
     switch $package_manager
-        case apt
-            sudo $package_manager autoremove --purge $argv
-        case aptitude
-            sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
+        case apt aptitude
+            sudo $package_manager install $argv
         case pacman
-            sudo $package_manager -Rn (pacman -Qtdq) $argv
+            sudo $package_manager -S $argv
         case apk
-            logger 4 'No Such function in alpine apk'
+            sudo $package_manager add $argv
         case dnf
-            sudo $package_manager autoremove $argv
+            sudo $package_manager install $argv
         case xbps
-            sudo $package_manager-remove -Oo $argv
+            sudo $package_manager-install $argv
         case '*'
             logger 4 "No support package manager detected"
     end
@@ -419,11 +436,11 @@ function detectos
     end
   end
   #archlinux
-  if test -e /etc/arch-release
+  if test -e /usr/bin/pacman;and test -e /etc/pacman.d
     set -g package_manager pacman
   end
   #alpine
-  if cat /etc/os-release | grep -q 'Alpine Linux'
+  if test -e /usr/bin/apk;and test -e /etc/apk
     set -g package_manager apk
   end
   #fedora
@@ -431,7 +448,7 @@ function detectos
     set -g package_manager dnf
   end
   #voidlinux
-  if cat /etc/os-release | grep -q 'void'
+  if cat /etc/os-release | grep -q 'void';and test -e /usr/bin/xbps-install;
     set -g package_manager xbps
   end
 end
@@ -652,7 +669,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-02-04_02:26:11
+echo Build_Time_UTC=2022-03-30_03:26:56
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -729,7 +746,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Version Begonia@build3 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager Version Corleone@build1 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

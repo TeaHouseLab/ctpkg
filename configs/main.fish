@@ -74,7 +74,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Version Begonia@build3 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager Version Corleone@build1 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

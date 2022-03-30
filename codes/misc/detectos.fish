@@ -20,7 +20,7 @@ function detectos
     set -g package_manager dnf
   end
   #voidlinux
-  if cat /etc/os-release | grep -q 'void'
+  if cat /etc/os-release | grep -q 'void';and test -e /usr/bin/xbps-install;
     set -g package_manager xbps
   end
 end
