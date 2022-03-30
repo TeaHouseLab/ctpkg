@@ -8,11 +8,11 @@ function detectos
     end
   end
   #archlinux
-  if test -e /etc/arch-release
+  if test -e /usr/bin/pacman;and test -e /etc/pacman.d
     set -g package_manager pacman
   end
   #alpine
-  if cat /etc/os-release | grep -q 'Alpine Linux'
+  if test -e /usr/bin/apk;and test -e /etc/apk
     set -g package_manager apk
   end
   #fedora

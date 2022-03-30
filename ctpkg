@@ -652,7 +652,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-01-31_04:26:47
+echo Build_Time_UTC=2022-02-04_02:26:11
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
