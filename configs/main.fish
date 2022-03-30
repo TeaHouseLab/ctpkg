@@ -21,6 +21,7 @@ switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
+        logger 0 "Set backend as ctpm"
         logger 0 "Using ctpm source:$ctpm_source"
         grab $argv[2..-1]
     case i

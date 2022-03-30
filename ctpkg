@@ -670,7 +670,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-03-30_03:30:11
+echo Build_Time_UTC=2022-03-30_03:32:57
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -694,6 +694,7 @@ switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
+        logger 0 "Set backend as ctpm"
         logger 0 "Using ctpm source:$ctpm_source"
         grab $argv[2..-1]
     case i
