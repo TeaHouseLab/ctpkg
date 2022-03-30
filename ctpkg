@@ -10,6 +10,7 @@ function help_echo
   echo " -argv[1]:the command to execute"
   echo "  -Available:c(clean cache)
              i(install)
+             ir (reinstall)
              p(purge)
              pg(purge with groups,when use it without args,perform an autoremove)
              s(search)
@@ -669,7 +670,7 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-03-30_03:26:56
+echo Build_Time_UTC=2022-03-30_03:30:11
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -697,6 +698,8 @@ switch $argv[1]
         grab $argv[2..-1]
     case i
         install $argv[2..-1]
+    case ir
+        reinstall $argv[2..-1]
     case p
         purge $argv[2..-1]
     case pg

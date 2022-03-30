@@ -8,6 +8,7 @@ function help_echo
   echo " -argv[1]:the command to execute"
   echo "  -Available:c(clean cache)
              i(install)
+             ir (reinstall)
              p(purge)
              pg(purge with groups,when use it without args,perform an autoremove)
              s(search)

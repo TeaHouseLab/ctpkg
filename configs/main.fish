@@ -25,6 +25,8 @@ switch $argv[1]
         grab $argv[2..-1]
     case i
         install $argv[2..-1]
+    case ir
+        reinstall $argv[2..-1]
     case p
         purge $argv[2..-1]
     case pg
