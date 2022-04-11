@@ -1,5 +1,5 @@
 set -lx prefix [ctpkg]
-checkdependence file curl tar rm mv
+checkdependence git jq file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -21,7 +21,7 @@ switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
-        logger 0 "Set backend as ctpm"
+        logger 0 "Set backend as grab-ctpm(plugin)"
         logger 0 "Using ctpm source:$ctpm_source"
         grab $argv[2..-1]
     case i
@@ -44,7 +44,27 @@ switch $argv[1]
         update $argv[2..-1]
     case upg
         upgrade $argv[2..-1]
+    case aur
+        logger 0 "Set backend as aur-pacman(plugin)"
+        switch $argv[2]
+            case i
+                aur-install $argv[3..-1]
+            case b
+                set aur_build_only true
+                aur-install $argv[3..-1]
+            case s
+                aur-search $argv[3..-1]
+            case c
+                logger 0 'Please confirm that you really want to clean aur build cache[y/N]'
+                switch $_delete_var_
+                case Y y
+                    rm -rf ~/.ctpm/aur/*
+                case N n '*'
+                    logger 0 'Abort'
+            end
+        end
     case ctpm
+        logger 0 "Set backend as ctpm"
         switch $argv[2]
             case i
                 extract $argv[3..-1]
@@ -67,7 +87,7 @@ switch $argv[1]
                     case h help '*'
                         help_echo
                 end
-            case ss
+            case si
                 ctpm_show $argv[3..-1]
             case h help '*'
                 help_echo
@@ -77,7 +97,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Version Corleone@build1 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager QuickSliverR@build3 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

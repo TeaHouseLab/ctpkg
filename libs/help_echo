@@ -1,42 +1,87 @@
 function help_echo
-  set_color cyan
-  set_color normal
-  echo "==========Help Documentation=========="
-  set_color green
-  echo "argv[1] argv[2+]"
-  set_color normal
-  echo " -argv[1]:the command to execute"
-  echo "  -Available:c(clean cache)
-             i(install)
-             ir (reinstall)
-             p(purge)
-             pg(purge with groups,when use it without args,perform an autoremove)
-             s(search)
-             l(list installed package)
-             si(show info of a package)
-             sc(source used)
-             upd(update database)
-             upg(upgrade)
-             grab(download and install a package from online repo)
-                argv[2]:
-                  -Available:
-                      upd:update database
-                      l:list package in online repo
-                      s:search package in online repo
-                      xxx:the name of package
-                      For example:
-                      ctpkg grab l:list package
-                      ctpkg grab matcha-gtk-theme:install this package"
-  echo " -argv[2+]:the package you want to do on"
-  echo "--------------------------------------"
-  set_color green
-  echo "ctpm argv[2+]"
-  set_color normal
-  echo " -argv[1]:the command to execute"
-  echo "  -Available:
-             i(install)
-             p(purge)
-             l(list installed package)"
-  echo " -argv[2+]:the package you want to change"
-  echo "========================================"
+ echo '
+system package managment
+(./)app [c, i, ir, p, pg, s, l, si, sc, upd, upg] argv[1]
+
+    c: Clean package cache
+
+    i: Install a package
+
+    ir: Reinstall a package
+
+    p: Purge a package(with configure files)
+
+    pg: Purge a package(with its dependences)
+
+    s: Search a package
+
+    l: Print a list of all installed packages
+
+    si: Show the info of a package
+
+    sc: Print a list of all using sources
+
+    upd: Update the package database
+
+    upg: Upgrade the system
+
+aur helper plugin
+(./)app aur [i, b, s, c]
+
+    i: Build and install a package from aur
+
+    b: Build a package from aur
+
+    s: Search an aur package
+
+    c: Clean build cache
+
+ctpm grab plugin
+(./)app grab [upd, upg, l, s, *] argvs
+
+    upd: Update the grabhub package database
+
+    upg: Upgrade installed ctpm packages
+
+    l: Print a list of all avaiable ctpm packages
+
+    s: Search a ctpm package
+
+    si: Show the info of a ctpm package
+
+    *: Install a ctpm package from source
+        Example: ctpkg grab ctutils
+        Note: * is the ctpm package that you wish to install
+
+ctpm package managment
+(./)app ctpm [i/p/l] argvs
+
+    i: Install a ctpm package
+        Example: ctpkg ctpm i ctutils.ctpkg
+
+    p: Purge a ctpm package
+        Example: ctpkg ctpm p sys ctutils
+        Note: Packages in ctpm are splited into two kinds of package, sys package installed for the whole system, user package only works for the user who install it
+
+    l: Print a list of all installed ctpm packages
+
+Misc
+(./)app [v, h]
+
+    v: Show Version
+
+    h: Show this msg
+
+Args
+(./)app [-b/--ctbackend, -s/--ctsource] commands
+
+    -b/--ctbackend: Force set a backend for ctpkg system package managment system
+        Example: ctpkg -b apt i fish
+        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps'}
+
+    -s/--ctsource: Force set a source for ctpkg ctpm package managment system(plugin grubhub)
+        Example: ctpkg -s 'https://ctpm.ruzhtw.top/' grab ctutils
+    
+    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf 
+'
 end

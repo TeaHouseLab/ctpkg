@@ -6,8 +6,7 @@ function purge
         case aptitude
             sudo $package_manager purge $argv
         case pacman
-            sudo $package_manager -Rn $argv
-            sudo $package_manager -Rn (pacman -Qtdq)
+            sudo $package_manager -Rsn $argv
         case apk
             sudo $package_manager del $argv
         case dnf

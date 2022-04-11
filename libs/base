@@ -30,7 +30,7 @@ function dir_exist
   if test -d $argv[1]
   else
     set_color red
-    echo "$prefix [error] [checkdir] check failed - dir $argv[1] doesn't exist,going to makr one"
+    echo "$prefix [error] [checkdir] check failed - dir $argv[1] doesn't exist,going to make one"
     set_color normal
     mkdir $argv[1]
   end

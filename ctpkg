@@ -1,46 +1,91 @@
 #!/usr/bin/env fish
 
 function help_echo
-  set_color cyan
-  set_color normal
-  echo "==========Help Documentation=========="
-  set_color green
-  echo "argv[1] argv[2+]"
-  set_color normal
-  echo " -argv[1]:the command to execute"
-  echo "  -Available:c(clean cache)
-             i(install)
-             ir (reinstall)
-             p(purge)
-             pg(purge with groups,when use it without args,perform an autoremove)
-             s(search)
-             l(list installed package)
-             si(show info of a package)
-             sc(source used)
-             upd(update database)
-             upg(upgrade)
-             grab(download and install a package from online repo)
-                argv[2]:
-                  -Available:
-                      upd:update database
-                      l:list package in online repo
-                      s:search package in online repo
-                      xxx:the name of package
-                      For example:
-                      ctpkg grab l:list package
-                      ctpkg grab matcha-gtk-theme:install this package"
-  echo " -argv[2+]:the package you want to do on"
-  echo "--------------------------------------"
-  set_color green
-  echo "ctpm argv[2+]"
-  set_color normal
-  echo " -argv[1]:the command to execute"
-  echo "  -Available:
-             i(install)
-             p(purge)
-             l(list installed package)"
-  echo " -argv[2+]:the package you want to change"
-  echo "========================================"
+ echo '
+system package managment
+(./)app [c, i, ir, p, pg, s, l, si, sc, upd, upg] argv[1]
+
+    c: Clean package cache
+
+    i: Install a package
+
+    ir: Reinstall a package
+
+    p: Purge a package(with configure files)
+
+    pg: Purge a package(with its dependences)
+
+    s: Search a package
+
+    l: Print a list of all installed packages
+
+    si: Show the info of a package
+
+    sc: Print a list of all using sources
+
+    upd: Update the package database
+
+    upg: Upgrade the system
+
+aur helper plugin
+(./)app aur [i, b, s, c]
+
+    i: Build and install a package from aur
+
+    b: Build a package from aur
+
+    s: Search an aur package
+
+    c: Clean build cache
+
+ctpm grab plugin
+(./)app grab [upd, upg, l, s, *] argvs
+
+    upd: Update the grabhub package database
+
+    upg: Upgrade installed ctpm packages
+
+    l: Print a list of all avaiable ctpm packages
+
+    s: Search a ctpm package
+
+    si: Show the info of a ctpm package
+
+    *: Install a ctpm package from source
+        Example: ctpkg grab ctutils
+        Note: * is the ctpm package that you wish to install
+
+ctpm package managment
+(./)app ctpm [i/p/l] argvs
+
+    i: Install a ctpm package
+        Example: ctpkg ctpm i ctutils.ctpkg
+
+    p: Purge a ctpm package
+        Example: ctpkg ctpm p sys ctutils
+        Note: Packages in ctpm are splited into two kinds of package, sys package installed for the whole system, user package only works for the user who install it
+
+    l: Print a list of all installed ctpm packages
+
+Misc
+(./)app [v, h]
+
+    v: Show Version
+
+    h: Show this msg
+
+Args
+(./)app [-b/--ctbackend, -s/--ctsource] commands
+
+    -b/--ctbackend: Force set a backend for ctpkg system package managment system
+        Example: ctpkg -b apt i fish
+        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps'}
+
+    -s/--ctsource: Force set a source for ctpkg ctpm package managment system(plugin grubhub)
+        Example: ctpkg -s 'https://ctpm.ruzhtw.top/' grab ctutils
+    
+    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf 
+'
 end
 
 function logger-warn
@@ -115,7 +160,7 @@ function dir_exist
   if test -d $argv[1]
   else
     set_color red
-    echo "$prefix [error] [checkdir] check failed - dir $argv[1] doesn't exist,going to makr one"
+    echo "$prefix [error] [checkdir] check failed - dir $argv[1] doesn't exist,going to make one"
     set_color normal
     mkdir $argv[1]
   end
@@ -163,8 +208,7 @@ function purge
         case aptitude
             sudo $package_manager purge $argv
         case pacman
-            sudo $package_manager -Rn $argv
-            sudo $package_manager -Rn (pacman -Qtdq)
+            sudo $package_manager -Rsn $argv
         case apk
             sudo $package_manager del $argv
         case dnf
@@ -320,7 +364,7 @@ function autoremove
         case aptitude
             sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
         case pacman
-            sudo $package_manager -Rn (pacman -Qtdq) $argv
+            sudo $package_manager -Rsn (pacman -Qtdq) $argv
         case apk
             logger 4 'No Such function in alpine apk'
         case dnf
@@ -452,6 +496,62 @@ function detectos
   if cat /etc/os-release | grep -q 'void';and test -e /usr/bin/xbps-install;
     set -g package_manager xbps
   end
+end
+
+function aur-search
+    logger 0 "Querying aur..."
+    for keywords in $argv
+        curl -sL "https://aur.archlinux.org/rpc/?v=5&type=search&arg=$keywords" | jq -r '.results as $data | $data[] | "\n\u001b[32maur-pacman/"+.Name+" "+.Version+"\u001b[32m","\u001b[0mDescription: "+.Description'
+    end
+end
+
+function aur-install
+    set recudir (pwd)
+    dir_exist ~/.ctpm/aur
+    cd ~/.ctpm/aur
+    function aur-get-pkgbuild
+        logger 0 "Getting $argv PKGBUILD file"
+        if test (curl --progress-bar -sL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$argv" | head -n1) != "<!DOCTYPE html>"
+            logger 1 "Check passed,getting build files"
+        else
+            logger 4 "Unable to get the PKGBUILD file of "$argv", please check your package name and network connection, abort"
+            exit
+        end
+        if git clone "https://aur.archlinux.org/$argv"
+            logger 1 "Build files downloaded,please review it,then press ctrl+x to continue"
+            sleep 1
+        else
+            logger 4 "Unable to get build files of "$argv", please check your package name and network connection, abort"
+            exit
+        end
+    end
+    for target in $argv
+        if test -e ~/.ctpm/aur/$target/PKGBUILD
+            logger 0 'Detected an existed BUILDPKG file, would you want to remove it and build it from aur?[y/N]'
+            read -n1 -P "$prefix >>> " _delete_var_
+            switch $_delete_var_
+                case Y y
+                    rm -rf $target
+                    aur-get-pkgbuild "$target"
+                case N n '*'
+            end
+        else
+            aur-get-pkgbuild "$target"
+        end
+        cd $target
+        command nano PKGBUILD
+        if test "$aur_build_only" = true
+            if makepkg -s
+                logger 1 "Store at ~/.ctpm/aur/$target/"
+            else
+                logger 4 "Package $target failed to build"
+            end
+        else
+            makepkg -si
+        end
+        cd ..
+    end
+    cd $recudir
 end
 
 function user_list
@@ -670,9 +770,9 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-03-30_03:32:57
+echo Build_Time_UTC=2022-04-11_06:31:33
 set -lx prefix [ctpkg]
-checkdependence file curl tar rm mv
+checkdependence git jq file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -694,7 +794,7 @@ switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
-        logger 0 "Set backend as ctpm"
+        logger 0 "Set backend as grab-ctpm(plugin)"
         logger 0 "Using ctpm source:$ctpm_source"
         grab $argv[2..-1]
     case i
@@ -717,7 +817,27 @@ switch $argv[1]
         update $argv[2..-1]
     case upg
         upgrade $argv[2..-1]
+    case aur
+        logger 0 "Set backend as aur-pacman(plugin)"
+        switch $argv[2]
+            case i
+                aur-install $argv[3..-1]
+            case b
+                set aur_build_only true
+                aur-install $argv[3..-1]
+            case s
+                aur-search $argv[3..-1]
+            case c
+                logger 0 'Please confirm that you really want to clean aur build cache[y/N]'
+                switch $_delete_var_
+                case Y y
+                    rm -rf ~/.ctpm/aur/*
+                case N n '*'
+                    logger 0 'Abort'
+            end
+        end
     case ctpm
+        logger 0 "Set backend as ctpm"
         switch $argv[2]
             case i
                 extract $argv[3..-1]
@@ -740,7 +860,7 @@ switch $argv[1]
                     case h help '*'
                         help_echo
                 end
-            case ss
+            case si
                 ctpm_show $argv[3..-1]
             case h help '*'
                 help_echo
@@ -750,7 +870,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Version Corleone@build1 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager QuickSliverR@build3 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
