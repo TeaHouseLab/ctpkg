@@ -1,5 +1,5 @@
 set -lx prefix [ctpkg]
-checkdependence git jq file curl tar rm mv
+checkdependence jq file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -56,12 +56,13 @@ switch $argv[1]
                 aur-search $argv[3..-1]
             case c
                 logger 0 'Please confirm that you really want to clean aur build cache[y/N]'
+                read -n1 -P "$prefix >>> " _delete_var_
                 switch $_delete_var_
-                case Y y
-                    rm -rf ~/.ctpm/aur/*
-                case N n '*'
-                    logger 0 'Abort'
-            end
+                    case Y y
+                        rm -rf ~/.ctpm/aur/*
+                    case N n '*'
+                        logger 0 Abort
+                end
         end
     case ctpm
         logger 0 "Set backend as ctpm"
@@ -97,7 +98,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager QuickSliverR@build3 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager QuickSliverR@build4 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
