@@ -5,7 +5,7 @@ function autoremove
         case aptitude
             sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
         case pacman
-            sudo $package_manager -Rsn (pacman -Qtdq) $argv
+            sudo $package_manager -Rsnc (pacman -Qtdq) $argv
         case apk
             logger 4 'No Such function in alpine apk'
         case dnf

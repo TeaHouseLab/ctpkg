@@ -1,5 +1,5 @@
 set -lx prefix [ctpkg]
-checkdependence jq file curl tar rm mv
+checkdependence file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -46,6 +46,7 @@ switch $argv[1]
         upgrade $argv[2..-1]
     case aur
         logger 0 "Set backend as aur-pacman(plugin)"
+        checkdependence jq git
         switch $argv[2]
             case i
                 aur-install $argv[3..-1]

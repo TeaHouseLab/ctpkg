@@ -220,71 +220,6 @@ function purge
     end
 end
 
-function grab
-    switch $argv[1]
-        case upd
-            if sudo curl --progress-bar -L -o /var/lib/ctpm/world $ctpm_source/list
-                logger 1 "Package List downloaded"
-            else
-                logger 4 "Failed to download package list from online repo,abort"
-                exit
-            end
-        case upg
-            grab upd
-            logger 0 "Checking for update"
-            if ls -1qA ~/.ctpm/package_info/ | grep -q .
-                for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
-                    set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
-                    if test $package_relver_repo -gt $package_relver
-                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
-                        grab $ctpm_package
-                    else
-                        logger 0 "$ctpm_package is the latest package,skip"
-                    end
-                end
-            end
-            if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
-                for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
-                    set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
-                    if test $package_relver_repo -gt $package_relver
-                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
-                        grab $ctpm_package
-                    else
-                        logger 0 "$ctpm_package is the latest package,skip"
-                    end
-                end
-            end
-        case l
-            echo "found in source:"
-            cat /var/lib/ctpm/world
-        case s
-            echo "found in source:"
-            for ctpm_package in $argv[2..-1]
-                grep $ctpm_package /var/lib/ctpm/world
-            end
-        case '*'
-            for ctpm_package in $argv
-                logger 0 "Grabbing $ctpm_package"
-                if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
-                    if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
-                    else
-                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
-                        rm /tmp/$ctpm_package.ctpkg
-                        exit
-                    end
-                    logger 1 "package:$ctpm_package Downloaded,installing..."
-                    cd /tmp
-                    extract $ctpm_package.ctpkg
-                    rm $ctpm_package.ctpkg
-                else
-                    logger 4 "package:$ctpm_package failed to download,ignored"
-                end
-            end
-    end
-end
-
 function clean
     switch $package_manager
         case apt aptitude
@@ -355,203 +290,6 @@ function show
         case '*'
             logger 4 "No support package manager detected"
     end
-end
-
-function autoremove
-    switch $package_manager
-        case apt
-            sudo $package_manager autoremove --purge $argv
-        case aptitude
-            sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
-        case pacman
-            sudo $package_manager -Rsn (pacman -Qtdq) $argv
-        case apk
-            logger 4 'No Such function in alpine apk'
-        case dnf
-            sudo $package_manager autoremove $argv
-        case xbps
-            sudo $package_manager-remove -Oo $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
-end
-
-function update
-    switch $package_manager
-        case apt aptitude
-            sudo $package_manager update $argv
-        case pacman
-            sudo $package_manager -Sy $argv
-        case apk
-            sudo $package_manager update $argv
-        case dnf
-            sudo $package_manager check-update $argv
-        case xbps
-            sudo $package_manager-install -S $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
-end
-
-function source_list
-    switch $package_manager
-        case apt aptitude
-            cat /etc/apt/sources.list | grep --color=never deb
-            cat /etc/apt/sources.list.d/* | grep --color=never deb
-        case pacman
-            cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
-            cat /etc/pacman.conf | grep --color=never "Server =" 
-        case apk
-            cat /etc/apk/repositories $argv
-        case dnf
-            $package_manager repolist $argv
-        case xbps
-            $package_manager-query -L $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
-end
-
-function list
-    switch $package_manager
-        case apt aptitude
-            apt list --installed $argv
-        case pacman
-            $package_manager -Qq $argv
-        case apk
-            $package_manager list $argv
-        case dnf
-            $package_manager list installed $argv
-        case xbps
-            $package_manager-query -l $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
-end
-
-function install
-    switch $package_manager
-        case apt aptitude
-            sudo $package_manager install $argv
-        case pacman
-            sudo $package_manager -S $argv
-        case apk
-            sudo $package_manager add $argv
-        case dnf
-            sudo $package_manager install $argv
-        case xbps
-            sudo $package_manager-install $argv
-        case '*'
-            logger 4 "No support package manager detected"
-    end
-end
-
-function ctconfig_init
-    if test -e /etc/centerlinux/conf.d/ctpkg.conf
-    else
-        set_color red
-        echo "$prefix Detected First Launching,We need your password to create the config file"
-        set_color normal
-        if test -d /etc/centerlinux/conf.d/
-        else
-            sudo mkdir -p /etc/centerlinux/conf.d/
-        end
-        echo "source=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
-        echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
-    end
-    if test -d /var/lib/ctpm/package_info
-    else
-        logger 3 'Creating ctpm package info database'
-        sudo mkdir -p /var/lib/ctpm/package_info
-    end
-    if test -d ~/.ctpm/package_info
-    else
-        logger 3 'Creating ctpm user package info database'
-        mkdir -p ~/.ctpm/package_info
-    end
-end
-
-function detectos
-  #debian
-  if test -e /etc/debian_version
-    if test -e /usr/bin/aptitude
-      set -g package_manager aptitude
-    else
-      set -g package_manager apt
-    end
-  end
-  #archlinux
-  if test -e /usr/bin/pacman;and test -e /etc/pacman.d
-    set -g package_manager pacman
-  end
-  #alpine
-  if test -e /usr/bin/apk;and test -e /etc/apk
-    set -g package_manager apk
-  end
-  #fedora
-  if test -e /etc/fedora-release
-    set -g package_manager dnf
-  end
-  #voidlinux
-  if cat /etc/os-release | grep -q 'void';and test -e /usr/bin/xbps-install;
-    set -g package_manager xbps
-  end
-end
-
-function aur-search
-    logger 0 "Querying aur..."
-    for keywords in $argv
-        curl -sL "https://aur.archlinux.org/rpc/?v=5&type=search&arg=$keywords" | jq -r '.results as $data | $data[] | "\n\u001b[32maur-pacman/"+.Name+" "+.Version+"\u001b[32m","\u001b[0mDescription: "+.Description'
-    end
-end
-
-function aur-install
-    set recudir (pwd)
-    dir_exist ~/.ctpm/aur
-    cd ~/.ctpm/aur
-    function aur-get-pkgbuild
-        logger 0 "Getting $argv PKGBUILD file"
-        if test (curl --progress-bar -sL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$argv" | head -n1) != "<!DOCTYPE html>"
-            logger 1 "Check passed,getting build files"
-        else
-            logger 4 "Unable to get the PKGBUILD file of "$argv", please check your package name and network connection, abort"
-            exit
-        end
-        if git clone "https://aur.archlinux.org/$argv"
-            logger 1 "Build files downloaded,please review it,then press ctrl+x to continue"
-            sleep 1
-        else
-            logger 4 "Unable to get build files of "$argv", please check your package name and network connection, abort"
-            exit
-        end
-    end
-    for target in $argv
-        if test -e ~/.ctpm/aur/$target/PKGBUILD
-            logger 0 'Detected an existed BUILDPKG file, would you want to remove it and build it from aur?[y/N]'
-            read -n1 -P "$prefix >>> " _delete_var_
-            switch $_delete_var_
-                case Y y
-                    rm -rf $target
-                    aur-get-pkgbuild "$target"
-                case N n '*'
-            end
-        else
-            aur-get-pkgbuild "$target"
-        end
-        cd $target
-        command nano PKGBUILD
-        if test "$aur_build_only" = true
-            if makepkg -s
-                logger 1 "Store at ~/.ctpm/aur/$target/"
-            else
-                logger 4 "Package $target failed to build"
-            end
-        else
-            makepkg -si
-        end
-        cd ..
-    end
-    cd $recudir
 end
 
 function user_list
@@ -770,9 +508,271 @@ function sys_purge
     end
 end
 
-echo Build_Time_UTC=2022-04-11_12:13:50
+function autoremove
+    switch $package_manager
+        case apt
+            sudo $package_manager autoremove --purge $argv
+        case aptitude
+            sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
+        case pacman
+            sudo $package_manager -Rsnc (pacman -Qtdq) $argv
+        case apk
+            logger 4 'No Such function in alpine apk'
+        case dnf
+            sudo $package_manager autoremove $argv
+        case xbps
+            sudo $package_manager-remove -Oo $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function update
+    switch $package_manager
+        case apt aptitude
+            sudo $package_manager update $argv
+        case pacman
+            sudo $package_manager -Sy $argv
+        case apk
+            sudo $package_manager update $argv
+        case dnf
+            sudo $package_manager check-update $argv
+        case xbps
+            sudo $package_manager-install -S $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function source_list
+    switch $package_manager
+        case apt aptitude
+            cat /etc/apt/sources.list | grep --color=never deb
+            cat /etc/apt/sources.list.d/* | grep --color=never deb
+        case pacman
+            cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
+            cat /etc/pacman.conf | grep --color=never "Server =" 
+        case apk
+            cat /etc/apk/repositories $argv
+        case dnf
+            $package_manager repolist $argv
+        case xbps
+            $package_manager-query -L $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function list
+    switch $package_manager
+        case apt aptitude
+            apt list --installed $argv
+        case pacman
+            $package_manager -Qq $argv
+        case apk
+            $package_manager list $argv
+        case dnf
+            $package_manager list installed $argv
+        case xbps
+            $package_manager-query -l $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function install
+    switch $package_manager
+        case apt aptitude
+            sudo $package_manager install $argv
+        case pacman
+            sudo $package_manager -S $argv
+        case apk
+            sudo $package_manager add $argv
+        case dnf
+            sudo $package_manager install $argv
+        case xbps
+            sudo $package_manager-install $argv
+        case '*'
+            logger 4 "No support package manager detected"
+    end
+end
+
+function grab
+    switch $argv[1]
+        case upd
+            if sudo curl --progress-bar -L -o /var/lib/ctpm/world $ctpm_source/list
+                logger 1 "Package List downloaded"
+            else
+                logger 4 "Failed to download package list from online repo,abort"
+                exit
+            end
+        case upg
+            grab upd
+            logger 0 "Checking for update"
+            if ls -1qA ~/.ctpm/package_info/ | grep -q .
+                for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                    set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                    if test $package_relver_repo -gt $package_relver
+                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                        grab $ctpm_package
+                    else
+                        logger 0 "$ctpm_package is the latest package,skip"
+                    end
+                end
+            end
+            if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
+                for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
+                    set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
+                    set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
+                    if test $package_relver_repo -gt $package_relver
+                        logger 0 "Upgrading $ctpm_package to version:$package_relver_repo"
+                        grab $ctpm_package
+                    else
+                        logger 0 "$ctpm_package is the latest package,skip"
+                    end
+                end
+            end
+        case l
+            echo "found in source:"
+            cat /var/lib/ctpm/world
+        case s
+            echo "found in source:"
+            for ctpm_package in $argv[2..-1]
+                grep $ctpm_package /var/lib/ctpm/world
+            end
+        case '*'
+            for ctpm_package in $argv
+                logger 0 "Grabbing $ctpm_package"
+                if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $ctpm_source/$ctpm_package.ctpkg
+                    if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
+                    else
+                        logger 4 "The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
+                        rm /tmp/$ctpm_package.ctpkg
+                        exit
+                    end
+                    logger 1 "package:$ctpm_package Downloaded,installing..."
+                    cd /tmp
+                    extract $ctpm_package.ctpkg
+                    rm $ctpm_package.ctpkg
+                else
+                    logger 4 "package:$ctpm_package failed to download,ignored"
+                end
+            end
+    end
+end
+
+function aur-search
+    logger 0 "Querying aur..."
+    for keywords in $argv
+        curl -sL "https://aur.archlinux.org/rpc/?v=5&type=search&arg=$keywords" | jq -r '.results as $data | $data[] | "\n\u001b[32maur-pacman/"+.Name+" "+.Version+"\u001b[32m","\u001b[0mDescription: "+.Description'
+    end
+end
+
+function aur-install
+    set recudir (pwd)
+    dir_exist ~/.ctpm/aur
+    cd ~/.ctpm/aur
+    function aur-get-pkgbuild
+        logger 0 "Getting $argv PKGBUILD file"
+        if test (curl --progress-bar -sL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$argv" | head -n1) != "<!DOCTYPE html>"
+            logger 1 "Check passed,getting build files"
+        else
+            logger 4 "Unable to get the PKGBUILD file of "$argv", please check your package name and network connection, abort"
+            exit
+        end
+        if git clone "https://aur.archlinux.org/$argv"
+            logger 1 "Build files downloaded,please review it,then press ctrl+x to continue"
+            sleep 1
+        else
+            logger 4 "Unable to get build files of "$argv", please check your package name and network connection, abort"
+            exit
+        end
+    end
+    for target in $argv
+        if test -e ~/.ctpm/aur/$target/PKGBUILD
+            logger 0 'Detected an existed BUILDPKG file, would you want to remove it and build it from aur?[y/N]'
+            read -n1 -P "$prefix >>> " _delete_var_
+            switch $_delete_var_
+                case Y y
+                    rm -rf $target
+                    aur-get-pkgbuild "$target"
+                case N n '*'
+            end
+        else
+            aur-get-pkgbuild "$target"
+        end
+        cd $target
+        command nano PKGBUILD
+        if test "$aur_build_only" = true
+            if makepkg -s
+                logger 1 "Store at ~/.ctpm/aur/$target/"
+            else
+                logger 4 "Package $target failed to build"
+            end
+        else
+            makepkg -si
+        end
+        cd ..
+    end
+    cd $recudir
+end
+
+function ctconfig_init
+    if test -e /etc/centerlinux/conf.d/ctpkg.conf
+    else
+        set_color red
+        echo "$prefix Detected First Launching,We need your password to create the config file"
+        set_color normal
+        if test -d /etc/centerlinux/conf.d/
+        else
+            sudo mkdir -p /etc/centerlinux/conf.d/
+        end
+        echo "source=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+        echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+    end
+    if test -d /var/lib/ctpm/package_info
+    else
+        logger 3 'Creating ctpm package info database'
+        sudo mkdir -p /var/lib/ctpm/package_info
+    end
+    if test -d ~/.ctpm/package_info
+    else
+        logger 3 'Creating ctpm user package info database'
+        mkdir -p ~/.ctpm/package_info
+    end
+end
+
+function detectos
+  #debian
+  if test -e /etc/debian_version
+    if test -e /usr/bin/aptitude
+      set -g package_manager aptitude
+    else
+      set -g package_manager apt
+    end
+  end
+  #archlinux
+  if test -e /usr/bin/pacman;and test -e /etc/pacman.d
+    set -g package_manager pacman
+  end
+  #alpine
+  if test -e /usr/bin/apk;and test -e /etc/apk
+    set -g package_manager apk
+  end
+  #fedora
+  if test -e /etc/fedora-release
+    set -g package_manager dnf
+  end
+  #voidlinux
+  if cat /etc/os-release | grep -q 'void';and test -e /usr/bin/xbps-install;
+    set -g package_manager xbps
+  end
+end
+
+echo Build_Time_UTC=2022-04-12_01:42:17
 set -lx prefix [ctpkg]
-checkdependence jq file curl tar rm mv
+checkdependence file curl tar rm mv
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -819,6 +819,7 @@ switch $argv[1]
         upgrade $argv[2..-1]
     case aur
         logger 0 "Set backend as aur-pacman(plugin)"
+        checkdependence jq git
         switch $argv[2]
             case i
                 aur-install $argv[3..-1]
