@@ -15,7 +15,7 @@ function sys_install
         set src_file_dirname (dirname $src_file)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname" &>/dev/null
+            sudo mkdir -p "$src_file_dirname" &>/dev/null
         end
         if test -e $src_file
             sudo rm -rf $src_file

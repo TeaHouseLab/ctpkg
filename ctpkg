@@ -13,7 +13,7 @@ system package managment
 
     p: Purge a package(with configure files)
 
-    pg: Purge a package(with its dependences)
+    pg: Purge a package(with its dependences and their configure files)/Autoremove
 
     s: Search a package
 
@@ -456,7 +456,7 @@ function sys_install
         set src_file_dirname (dirname $src_file)
         if test -d "$src_file_dirname"
         else
-            sudo mkdir "$src_file_dirname" &>/dev/null
+            sudo mkdir -p "$src_file_dirname" &>/dev/null
         end
         if test -e $src_file
             sudo rm -rf $src_file
@@ -770,7 +770,7 @@ function detectos
   end
 end
 
-echo Build_Time_UTC=2022-04-12_01:42:17
+echo Build_Time_UTC=2022-05-09_05:43:32
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -872,7 +872,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager QuickSliverR@build4 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager Quicksand@build1 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

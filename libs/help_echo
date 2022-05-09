@@ -11,7 +11,7 @@ system package managment
 
     p: Purge a package(with configure files)
 
-    pg: Purge a package(with its dependences)
+    pg: Purge a package(with its dependences and their configure files)/Autoremove
 
     s: Search a package
 
