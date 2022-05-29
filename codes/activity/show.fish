@@ -4,7 +4,7 @@ function show
             $package_manager show $argv
         case pacman
             $package_manager -Si $argv
-        case apk dnf
+        case apk dnf yum
             $package_manager info $argv
         case xbps
             $package_manager-query -RS $argv

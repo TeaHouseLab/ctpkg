@@ -6,7 +6,7 @@ function update
             sudo $package_manager -Sy $argv
         case apk
             sudo $package_manager update $argv
-        case dnf
+        case dnf yum
             sudo $package_manager check-update $argv
         case xbps
             sudo $package_manager-install -S $argv

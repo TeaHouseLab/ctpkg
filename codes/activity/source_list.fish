@@ -8,7 +8,7 @@ function source_list
             cat /etc/pacman.conf | grep --color=never "Server =" 
         case apk
             cat /etc/apk/repositories $argv
-        case dnf
+        case dnf yum
             $package_manager repolist $argv
         case xbps
             $package_manager-query -L $argv

@@ -7,7 +7,7 @@ function reinstall
     case apk
         sudo $package_manager dev $argv
         sudo $package_manager add $argv
-    case dnf
+    case dnf yum
         sudo $package_manager reinstall $argv
     case xbps
         sudo $package_manager-install -f $argv

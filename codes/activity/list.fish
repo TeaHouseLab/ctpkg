@@ -6,8 +6,8 @@ function list
             $package_manager -Qq $argv
         case apk
             $package_manager list $argv
-        case dnf
-            $package_manager list installed $argv
+        case yum dnf
+            rpm -qa
         case xbps
             $package_manager-query -l $argv
         case '*'

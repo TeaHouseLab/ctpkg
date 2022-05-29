@@ -8,7 +8,7 @@ function autoremove
             sudo $package_manager -Rsnc (pacman -Qtdq) $argv
         case apk
             logger 4 'No Such function in alpine apk'
-        case dnf
+        case dnf yum
             sudo $package_manager autoremove $argv
         case xbps
             sudo $package_manager-remove -Oo $argv

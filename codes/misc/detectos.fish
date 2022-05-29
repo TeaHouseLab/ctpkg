@@ -23,6 +23,10 @@ function detectos
     if test -e /etc/fedora-release
         set -g package_manager dnf
     end
+    #centos
+    if test -e /etc/centos-release
+        set -g package_manager yum
+    end
     #voidlinux
     if command -q xbps-install
         set -g package_manager xbps

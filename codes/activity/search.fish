@@ -1,6 +1,6 @@
 function search
     switch $package_manager
-        case apt aptitude apk dnf
+        case apt aptitude apk dnf yum
             $package_manager search $argv
         case pacman
             $package_manager -Ss $argv

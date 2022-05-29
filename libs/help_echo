@@ -77,7 +77,7 @@ Args
 
     -b/--ctbackend: Force set a backend for ctpkg system package managment system
         Example: ctpkg -b apt i fish
-        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps'}
+        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum'}
 
     -s/--ctsource: Force set a source for ctpkg ctpm package managment system(plugin grubhub)
         Example: ctpkg -s 'https://ctpm.ruzhtw.top/' grab ctutils

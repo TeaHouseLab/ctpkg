@@ -6,7 +6,7 @@ function install
             sudo $package_manager -S $argv
         case apk
             sudo $package_manager add $argv
-        case dnf
+        case dnf yum
             sudo $package_manager install $argv
         case xbps
             sudo $package_manager-install $argv
