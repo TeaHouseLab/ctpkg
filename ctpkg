@@ -750,7 +750,7 @@ function detectos
         end
     end
     #archlinux
-    if test -e /etc/arch_version
+    if test -e /etc/arch-release
         if command -q pacman
             set -g package_manager pacman
         end
@@ -775,7 +775,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-05-29_07:02:57
+echo Build_Time_UTC=2022-05-29_15:38:59
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init

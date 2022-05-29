@@ -8,7 +8,7 @@ function detectos
         end
     end
     #archlinux
-    if test -e /etc/arch_version
+    if test -e /etc/arch-release
         if command -q pacman
             set -g package_manager pacman
         end
