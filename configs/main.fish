@@ -99,7 +99,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Quicksand@build1 | TeaHouseLab at ruzhtw.top"
+        logger 0 "CenterLinux Package Manager Quicksand@build2 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
