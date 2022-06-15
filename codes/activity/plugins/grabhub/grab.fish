@@ -10,6 +10,7 @@ function grab
             end
         case upg
             argparse -i -n $prefix y/no_confirm -- $argv
+            set counter_upg 1
             grab upd
             logger 0 "+ Checking for update"
             if ls -1qA ~/.ctpm/package_info/ | grep -q .
@@ -18,7 +19,8 @@ function grab
                     if grep -qs $ctpm_package /var/lib/ctpm/world
                         set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
                         if test $package_relver_repo -gt $package_relver
-                            set upgrade_package "$ctpm_package $upgrade_package"
+                            set upgrade_package[$counter_upg] "$ctpm_package"
+                            set counter_upg (math $counter_upg+1)
                         end
                     else
                         logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
@@ -31,7 +33,8 @@ function grab
                     if grep -qs $ctpm_package /var/lib/ctpm/world
                         set package_relver_repo (sed -n /$ctpm_package=/p /var/lib/ctpm/world | sed s/$ctpm_package=//g)
                         if test $package_relver_repo -gt $package_relver
-                            set upgrade_package "$ctpm_package $upgrade_package"
+                            set upgrade_package[$counter_upg] "$ctpm_package"
+                            set counter_upg (math $counter_upg+1)
                         end
                     else
                         logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
@@ -42,10 +45,10 @@ function grab
                 logger 0 "√ Your system is up to date"
             else
                 logger 0 "* The following packages is upgradable,upgrade them all?[y/N]"
-                echo -----------
-                echo "$upgrade_package"
-                echo -----------
-                if set -q "$_flag_no_confirm"
+                logger 0 -----------
+                logger 0 "$upgrade_package"
+                logger 0 -----------
+                if set -q _flag_no_confirm
                     grab $upgrade_package
                 else
                     read -n1 -P "$prefix >>> " upgrade_confirm
