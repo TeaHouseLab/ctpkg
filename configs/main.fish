@@ -16,13 +16,13 @@ end
 if set -q _flag_ctsource
     set ctpm_source $_flag_ctsource
 end
-logger 0 "Set backend as $package_manager"
+logger 0 "! Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
-        logger 0 "Set backend as grab-ctpm(plugin)"
-        logger 0 "Using ctpm source:$ctpm_source"
+        logger 0 "+ Loading grab-ctpm(plugin)"
+        logger 0 "! Using ctpm source:$ctpm_source"
         grab $argv[2..-1]
     case i
         install $argv[2..-1]
@@ -45,7 +45,7 @@ switch $argv[1]
     case upg
         upgrade $argv[2..-1]
     case aur
-        logger 0 "Set backend as aur-pacman(plugin)"
+        logger 0 "+ Loading aur-pacman(plugin)..."
         checkdependence jq git
         switch $argv[2]
             case i
@@ -99,7 +99,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "CenterLinux Package Manager Quicksand@build2 | TeaHouseLab at ruzhtw.top"
+        logger 0 "+ CenterLinux Package Manager Hairpin@build3 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
