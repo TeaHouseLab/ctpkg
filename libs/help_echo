@@ -42,6 +42,7 @@ ctpm grab plugin
     upd: Update the grabhub package database
 
     upg: Upgrade installed ctpm packages
+        Note: Add -y/--no_confirm to confirm upgrade
 
     l: Print a list of all avaiable ctpm packages
 

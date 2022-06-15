@@ -1,14 +1,15 @@
 function grab
     switch $argv[1]
         case upd
-            logger 0 "+ Refreshing ctpm-grab[R] package database"
+            logger 0 "+ Refreshing ctpm[R] package database"
             if sudo curl --progress-bar -L -o /var/lib/ctpm/world $ctpm_source/list
-                logger 1 "- ctpm-grab[R] package database refreshed"
+                logger 1 "- CTPM[R] package database refreshed"
             else
-                logger 4 "! Failed to refresh ctpm-grab[R] database, abort"
+                logger 4 "! Failed to refresh ctpm[R] database, abort"
                 exit
             end
         case upg
+            argparse -i -n $prefix y/no_confirm -- $argv
             grab upd
             logger 0 "+ Checking for update"
             if ls -1qA ~/.ctpm/package_info/ | grep -q .
@@ -44,13 +45,17 @@ function grab
                 echo -----------
                 echo "$upgrade_package"
                 echo -----------
-                read -n1 -P "$prefix >>> " upgrade_confirm
-                switch $upgrade_confirm
-                    case y Y
-                        grab $upgrade_package
-                    case n N '*'
-                        logger 3 "- Aborted by user"
-                        exit
+                if set -q "$_flag_no_confirm"
+                    grab $upgrade_package
+                else
+                    read -n1 -P "$prefix >>> " upgrade_confirm
+                    switch $upgrade_confirm
+                        case y Y
+                            grab $upgrade_package
+                        case n N '*'
+                            logger 3 "- Aborted by user"
+                            exit
+                    end
                 end
             end
         case l
