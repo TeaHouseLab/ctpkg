@@ -615,6 +615,8 @@ function grab
                         if test $package_relver_repo -gt $package_relver
                             set upgrade_package "$ctpm_package $upgrade_package"
                         end
+                    else
+                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end
@@ -626,6 +628,8 @@ function grab
                         if test $package_relver_repo -gt $package_relver
                             set upgrade_package "$ctpm_package $upgrade_package"
                         end
+                    else
+                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end
@@ -740,7 +744,7 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        echo "source=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+        echo "main=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.source &>/dev/null
         echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
     end
     if test -d /var/lib/ctpm/package_info
@@ -790,9 +794,9 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-15_14:06:01
+echo Build_Time_UTC=2022-06-15_14:15:45
 set -lx prefix [ctpkg]
-checkdependence file curl tar rm mv
+checkdependence file curl tar rm mv cut
 ctconfig_init
 set -lx ctpm_source (sed -n '/source=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/source=//g')
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
@@ -809,7 +813,7 @@ end
 if set -q _flag_ctsource
     set ctpm_source $_flag_ctsource
 end
-logger 0 "! Set backend as $package_manager"
+logger 0 "+ Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]

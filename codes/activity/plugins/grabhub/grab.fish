@@ -19,6 +19,8 @@ function grab
                         if test $package_relver_repo -gt $package_relver
                             set upgrade_package "$ctpm_package $upgrade_package"
                         end
+                    else
+                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end
@@ -30,6 +32,8 @@ function grab
                         if test $package_relver_repo -gt $package_relver
                             set upgrade_package "$ctpm_package $upgrade_package"
                         end
+                    else
+                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end

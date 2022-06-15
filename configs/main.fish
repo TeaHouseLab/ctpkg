@@ -16,7 +16,7 @@ end
 if set -q _flag_ctsource
     set ctpm_source $_flag_ctsource
 end
-logger 0 "! Set backend as $package_manager"
+logger 0 "+ Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
