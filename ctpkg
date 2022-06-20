@@ -81,11 +81,8 @@ Args
     -b/--ctbackend: Force set a backend for ctpkg system package managment system
         Example: ctpkg -b apt i fish
         Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum'}
-
-    -s/--ctsource: Force set a source for ctpkg ctpm package managment system(plugin grubhub)
-        Example: ctpkg -s 'https://ctpm.ruzhtw.top/' grab ctutils
     
-    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf 
+    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf, and /etc/centerlinux/conf.d/ctpkg.source for ctpm sources
 '
 end
 
@@ -857,7 +854,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-20_05:04:54
+echo Build_Time_UTC=2022-06-20_05:13:08
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -865,12 +862,9 @@ set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf 
 if [ "$package_manager" = "" ]
     detectos
 end
-argparse -i -n $prefix 's/ctsource=' 'b/ctbackend=' -- $argv
+argparse -i -n $prefix 'b/ctbackend=' -- $argv
 if set -q _flag_ctbackend
     set -g package_manager $_flag_ctbackend
-end
-if set -q _flag_ctsource
-    set ctpm_source $_flag_ctsource
 end
 logger 0 "+ Set backend as $package_manager"
 switch $argv[1]
