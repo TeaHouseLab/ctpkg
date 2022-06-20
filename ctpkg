@@ -631,8 +631,8 @@ function grab
             if ls -1qA ~/.ctpm/package_info/ | grep -q .
                 for ctpm_package in (cd ~/.ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
                     set package_relver (sed -n '/package_relver=/'p ~/.ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                    if grep -qs $ctpm_package /var/lib/ctpm/world
-                        set package_repo (cat /var/lib/ctpm/world | awk -F "/" '{print $1}')
+                    if grep -qsF "$ctpm_package=" /var/lib/ctpm/world
+                        set package_repo (cat /var/lib/ctpm/world | grep -F "$ctpm_package=" | awk -F "/" '{print $1}')
                         set package_relver_repo (cat /var/lib/ctpm/world | awk -F "/" '{print $2}' | sed -n "/$ctpm_package=/"p | awk -F "=" '{print $2}')
                         if test $package_relver_repo -gt $package_relver
                             set counter_upg (math $counter_upg+1)
@@ -646,8 +646,8 @@ function grab
             if ls -1qA /var/lib/ctpm/package_info/ | grep -q .
                 for ctpm_package in (cd /var/lib/ctpm/package_info/ && list_menu *.info | sed 's/.info//g')
                     set package_relver (sed -n '/package_relver=/'p /var/lib/ctpm/package_info/$ctpm_package.info | sed 's/package_relver=//g')
-                    if grep -qs $ctpm_package /var/lib/ctpm/world
-                        set package_repo (cat /var/lib/ctpm/world | awk -F "/" '{print $1}')
+                    if grep -qsF "$ctpm_package=" /var/lib/ctpm/world
+                        set package_repo (cat /var/lib/ctpm/world | grep -F "$ctpm_package=" | awk -F "/" '{print $1}')
                         set package_relver_repo (cat /var/lib/ctpm/world | awk -F "/" '{print $2}' | sed -n "/$ctpm_package=/"p | awk -F "=" '{print $2}')
                         if test $package_relver_repo -gt $package_relver
                             set counter_upg (math $counter_upg+1)
@@ -675,15 +675,15 @@ function grab
             cat /etc/centerlinux/conf.d/ctpkg.source
         case '*'
             logger 0 "+ Checking for packages..."
-            set counter_grab 1
-            set counter_grab_ignore 1
+            set counter_grab 0
+            set counter_grab_ignore 0
             for ctpm_package in $argv
                 if grep -qsF "$ctpm_package=" /var/lib/ctpm/world
-                    set grab_package[$counter_grab] $ctpm_package
                     set counter_grab (math $counter_grab+1)
+                    set grab_package[$counter_grab] $ctpm_package
                 else
-                    set grab_ignore[$counter_grab_ignore] $ctpm_package
                     set counter_grab_ignore (math $counter_grab+1)
+                    set grab_ignore[$counter_grab_ignore] $ctpm_package
                 end
             end
             if test "$grab_package" = ""
@@ -857,7 +857,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-20_05:20:39
+echo Build_Time_UTC=2022-06-20_05:42:52
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
