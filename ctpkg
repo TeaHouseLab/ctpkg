@@ -661,7 +661,11 @@ function grab
             if test "$upgrade_package" = ""
                 logger 0 "√ Your system is up to date"
             else
-                grab $upgrade_package
+                if set -q _flag_no_confirm
+                    grab $upgrade_package -y
+                else
+                    grab $upgrade_package
+                end
             end
         case l
             echo "* Listing all package available in cloud repo..."
@@ -710,7 +714,8 @@ function grab
             end
             for ctpm_package in $grab_package
                 if echo $ctpm_package | grep -qs /
-                    set target_source ( echo $ctpm_package | awk -F "/" '{print $1}')
+                    set target_source (echo $ctpm_package | awk -F "/" '{print $1}')
+                    set ctpm_package (echo $ctpm_package | awk -F "/" '{print $2}')
                 else
                     set target_source (grep -F "$ctpm_package=" /var/lib/ctpm/world | awk -F "/" '{print $1}')
                 end
@@ -857,7 +862,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-20_05:42:52
+echo Build_Time_UTC=2022-06-20_05:49:45
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init

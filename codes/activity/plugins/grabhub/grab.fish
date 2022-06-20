@@ -61,7 +61,11 @@ function grab
             if test "$upgrade_package" = ""
                 logger 0 "√ Your system is up to date"
             else
-                grab $upgrade_package
+                if set -q _flag_no_confirm
+                    grab $upgrade_package -y
+                else
+                    grab $upgrade_package
+                end
             end
         case l
             echo "* Listing all package available in cloud repo..."
@@ -110,7 +114,8 @@ function grab
             end
             for ctpm_package in $grab_package
                 if echo $ctpm_package | grep -qs /
-                    set target_source ( echo $ctpm_package | awk -F "/" '{print $1}')
+                    set target_source (echo $ctpm_package | awk -F "/" '{print $1}')
+                    set ctpm_package (echo $ctpm_package | awk -F "/" '{print $2}')
                 else
                     set target_source (grep -F "$ctpm_package=" /var/lib/ctpm/world | awk -F "/" '{print $1}')
                 end
