@@ -79,10 +79,7 @@ Args
     -b/--ctbackend: Force set a backend for ctpkg system package managment system
         Example: ctpkg -b apt i fish
         Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum'}
-
-    -s/--ctsource: Force set a source for ctpkg ctpm package managment system(plugin grubhub)
-        Example: ctpkg -s 'https://ctpm.ruzhtw.top/' grab ctutils
     
-    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf 
+    BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf, and /etc/centerlinux/conf.d/ctpkg.source for ctpm sources
 '
 end

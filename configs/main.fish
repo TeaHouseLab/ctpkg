@@ -5,12 +5,9 @@ set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf 
 if [ "$package_manager" = "" ]
     detectos
 end
-argparse -i -n $prefix 's/ctsource=' 'b/ctbackend=' -- $argv
+argparse -i -n $prefix 'b/ctbackend=' -- $argv
 if set -q _flag_ctbackend
     set -g package_manager $_flag_ctbackend
-end
-if set -q _flag_ctsource
-    set ctpm_source $_flag_ctsource
 end
 logger 0 "+ Set backend as $package_manager"
 switch $argv[1]
