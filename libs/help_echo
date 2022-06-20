@@ -36,7 +36,7 @@ aur helper plugin
 
     c: Clean build cache
 
-ctpm grab plugin
+ctpm[R] grab plugin
 (./)app grab [upd, upg, l, s, *] argvs
 
     upd: Update the grabhub package database
@@ -50,9 +50,12 @@ ctpm grab plugin
 
     si: Show the info of a ctpm package
 
+    sc: Print a list of all using sources
+
     *: Install a ctpm package from source
         Example: ctpkg grab ctutils
-        Note: * is the ctpm package that you wish to install
+        Note1: * is the ctpm package that you wish to install
+        Note2: Add -y/--no_confirm to confirm upgrade
 
 ctpm package managment
 (./)app ctpm [i/p/l] argvs
