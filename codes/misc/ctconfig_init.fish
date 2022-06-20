@@ -8,8 +8,11 @@ function ctconfig_init
         else
             sudo mkdir -p /etc/centerlinux/conf.d/
         end
-        echo "main=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.source &>/dev/null
         echo "backend=" | sudo tee -a /etc/centerlinux/conf.d/ctpkg.conf &>/dev/null
+    end
+    if test -e /etc/centerlinux/conf.d/ctpkg.source
+    else
+        echo "main=https://ctpm.ruzhtw.top/" | sudo tee /etc/centerlinux/conf.d/ctpkg.source &>/dev/null
     end
     if test -d /var/lib/ctpm/package_info
     else
