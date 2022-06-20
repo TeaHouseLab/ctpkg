@@ -308,7 +308,7 @@ function user_list
 end
 
 function user_install
-    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as user level"
+    logger 0 "-> Installing $package_name ver:$package_ver pakver:$package_relver as user level"
     cat src/file_list | tee ~/.ctpm/package_info/$package_name >/dev/null
     echo package_name=$package_name | tee ~/.ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | tee -a ~/.ctpm/package_info/$package_name.info >/dev/null
@@ -332,7 +332,7 @@ function user_install
         mv -f src$src_file ~/.$src_file &>/dev/null
     end
     if [ -s hooks ]
-        logger 0 "Running install hooks for $package_name"
+        logger 0 "-> Running install hooks for $package_name"
         chmod +x hooks
         ./hooks
     end
@@ -408,17 +408,17 @@ function extract
     end
     if [ -w /tmp/ctpm ]
     else
-        logger 4 '/tmp/ctpm is not accessable to this user,abort'
+        logger 4 'x /tmp/ctpm is not accessable to this user,abort'
     end
     for package_ctpm in $argv
         if test -e $package_ctpm
         else
-            logger 4 "$package_ctpm not found,abort"
+            logger 4 "x $package_ctpm not found,abort"
             exit
         end
         tar xf $package_ctpm -C /tmp/ctpm
         cd /tmp/ctpm
-        logger 0 'Extracted package'
+        logger 0 '-> Extracted package'
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
         set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
@@ -431,17 +431,17 @@ function extract
             case sys
                 sys_install
             case h '*'
-                logger 4 "Unknown package level,abort"
+                logger 4 "x Unknown package level,abort"
                 exit
         end
         cd $recudir
         rm -rf ctpm
-        logger 0 Processed
+        logger 0 "√ Processed"
     end
 end
 
 function sys_install
-    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as sys level"
+    logger 0 "-> Installing $package_name ver:$package_ver pakver:$package_relver as sys level"
     cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
     echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
@@ -465,7 +465,7 @@ function sys_install
         sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
-        logger 0 "Running install hooks for $package_name"
+        logger 0 "-> Running install hooks for $package_name"
         sudo chmod +x hooks
         sudo ./hooks
     end
@@ -862,7 +862,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-20_05:49:45
+echo Build_Time_UTC=2022-06-20_05:53:12
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -956,7 +956,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "+ CenterLinux Package Manager Hairpin@build3 | TeaHouseLab at ruzhtw.top"
+        logger 0 "+ CenterLinux Package Manager Hairpin@build4 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

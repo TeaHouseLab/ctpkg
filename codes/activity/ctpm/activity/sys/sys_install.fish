@@ -1,5 +1,5 @@
 function sys_install
-    logger 0 "installing $package_name ver:$package_ver pakver:$package_relver as sys level"
+    logger 0 "-> Installing $package_name ver:$package_ver pakver:$package_relver as sys level"
     cat src/file_list | sudo tee /var/lib/ctpm/package_info/$package_name >/dev/null
     echo package_name=$package_name | sudo tee /var/lib/ctpm/package_info/$package_name.info >/dev/null
     echo package_ver=$package_ver | sudo tee -a /var/lib/ctpm/package_info/$package_name.info >/dev/null
@@ -23,7 +23,7 @@ function sys_install
         sudo mv -f src$src_file $src_file &>/dev/null
     end
     if [ -s hooks ]
-        logger 0 "Running install hooks for $package_name"
+        logger 0 "-> Running install hooks for $package_name"
         sudo chmod +x hooks
         sudo ./hooks
     end
