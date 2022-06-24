@@ -101,6 +101,13 @@ function grab
                 logger 0 -----------
                 logger 0 "$grab_package"
                 logger 0 -----------
+                if test "$grab_ignore" = ""
+                else
+                    logger 3 "! The following packages won't be installed, cuz they're not available in any cloudrepo"
+                    logger 0 -----------
+                    logger 0 "$grab_ignore"
+                    logger 0 -----------
+                end
                 if set -q _flag_no_confirm
                 else
                     read -n1 -P "$prefix >>> " grab_confirm
