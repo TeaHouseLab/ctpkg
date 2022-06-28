@@ -134,14 +134,14 @@ function grab
                 logger 0 "Grabbing $ctpm_package"
                 if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $target_source_link/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
+                        logger 1 "Package:$ctpm_package Downloaded,installing..."
+                        cd /tmp
+                        extract $ctpm_package.ctpkg
+                        rm $ctpm_package.ctpkg
                     else
                         logger 4 "The package downloaded for $ctpm_package seems not a ctpkg file,remove and skip it,please try to download again and check the package name you typed"
                         rm /tmp/$ctpm_package.ctpkg
                     end
-                    logger 1 "Package:$ctpm_package Downloaded,installing..."
-                    cd /tmp
-                    extract $ctpm_package.ctpkg
-                    rm $ctpm_package.ctpkg
                 else
                     logger 4 "Package:$ctpm_package failed to download,ignored"
                 end
