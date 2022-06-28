@@ -9,12 +9,12 @@ argparse -i -n $prefix 'b/ctbackend=' -- $argv
 if set -q _flag_ctbackend
     set -g package_manager $_flag_ctbackend
 end
-logger 0 "+ Set backend as $package_manager"
+logger 0 "Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
-        logger 0 "+ Loading grab-ctpm(plugin)"
+        logger 0 "Loading grab-ctpm(plugin)"
         grab $argv[2..-1]
     case i
         install $argv[2..-1]
@@ -37,7 +37,7 @@ switch $argv[1]
     case upg
         upgrade $argv[2..-1]
     case aur
-        logger 0 "+ Loading aur-pacman(plugin)..."
+        logger 0 "Loading aur-pacman(plugin)..."
         checkdependence jq git
         switch $argv[2]
             case i
@@ -48,13 +48,13 @@ switch $argv[1]
             case s
                 aur-search $argv[3..-1]
             case c
-                logger 0 '? Please confirm that you really want to clean aur build cache[y/N]'
+                logger 3 'Please confirm that you really want to clean aur build cache[y/N]'
                 read -n1 -P "$prefix >>> " _delete_var_
                 switch $_delete_var_
                     case Y y
                         rm -rf ~/.ctpm/aur/*
                     case N n '*'
-                        logger 0 Abort
+                        logger 1 Abort
                 end
         end
     case ctpm
@@ -91,7 +91,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "+ CenterLinux Package Manager Hairpin@build4 | TeaHouseLab at ruzhtw.top"
+        logger 1 "+ CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

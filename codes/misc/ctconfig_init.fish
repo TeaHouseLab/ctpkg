@@ -16,12 +16,12 @@ function ctconfig_init
     end
     if test -d /var/lib/ctpm/package_info
     else
-        logger 3 'Creating ctpm package info database'
+        logger 4 'Creating ctpm package info database'
         sudo mkdir -p /var/lib/ctpm/package_info
     end
     if test -d ~/.ctpm/package_info
     else
-        logger 3 'Creating ctpm user package info database'
+        logger 4 'Creating ctpm user package info database'
         mkdir -p ~/.ctpm/package_info
     end
 end

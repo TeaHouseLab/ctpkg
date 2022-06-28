@@ -14,6 +14,6 @@ function upgrade
         case xbps
             sudo $package_manager-install -Su
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end

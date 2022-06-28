@@ -7,12 +7,12 @@ function autoremove
         case pacman
             sudo $package_manager -Rsnc (pacman -Qtdq) $argv
         case apk
-            logger 4 'No Such function in alpine apk'
+            logger 5 'No Such function in alpine apk'
         case dnf yum
             sudo $package_manager autoremove $argv
         case xbps
             sudo $package_manager-remove -Oo $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end

@@ -15,9 +15,9 @@ function user_purge
             if test -e ~/.ctpm/package_info/$package_ctpm.unis
             rm ~/.ctpm/package_info/$package_ctpm.unis
             end
-            logger 1 purged package:$package_ctpm
+            logger 2 "purged package:$package_ctpm"
         else
-            logger 4 "no info file of package:$package_ctpm,abort"
+            logger 5 "Info file of package:$package_ctpm has been lost, abort"
         end
     end
 end

@@ -91,40 +91,47 @@ end
 
 function logger-warn
   set_color magenta
-  echo "$prefix [Warn] $argv[1..-1]"
+  echo "$prefix ! $argv[1..-1]"
   set_color normal
 end
 function logger-error
   set_color red
-  echo "$prefix [Error] $argv[1..-1]"
+  echo "$prefix x $argv[1..-1]"
   set_color normal
 end
-function logger-info
+function logger-info-start
   set_color normal
-  echo "$prefix [Info] $argv[1..-1]"
+  echo "$prefix + $argv[1..-1]"
+  set_color normal
+end
+function logger-info-end
+  set_color normal
+  echo "$prefix - $argv[1..-1]"
   set_color normal
 end
 function logger-debug
   set_color yellow
-  echo "$prefix [Debug] $argv[1..-1]"
+  echo "$prefix ? $argv[1..-1]"
   set_color normal
 end
 function logger-success
   set_color green
-  echo "$prefix [Succeeded] $argv[1..-1]"
+  echo "$prefix √ $argv[1..-1]"
   set_color normal
 end
 function logger -d "a lib to print msg quickly"
 switch $argv[1]
 case 0
-  logger-info $argv[2..-1]
+  logger-info-start $argv[2..-1]
 case 1
-  logger-success $argv[2..-1]
+  logger-info-end $argv[2..-1]
 case 2
-  logger-debug $argv[2..-1]
+  logger-success $argv[2..-1]
 case 3
-  logger-warn $argv[2..-1]
+  logger-debug $argv[2..-1]
 case 4
+  logger-warn $argv[2..-1]
+case 5
   logger-error $argv[2..-1]
 end
 end
@@ -200,7 +207,7 @@ function search
         case xbps
             $package_manager-query -Rs $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -220,7 +227,7 @@ function purge
         case xbps
             sudo $package_manager-remove -R $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -231,13 +238,13 @@ function clean
         case pacman
             sudo $package_manager -Scc $argv
         case apk
-            logger 4 "No Such function in alpine apk"
+            logger 5 "No Such function in alpine apk"
         case dnf yum
             sudo $package_manager clean $argv
         case xbps
             sudo $package_manager-remove -O $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -255,7 +262,7 @@ function reinstall
     case xbps
         sudo $package_manager-install -f $argv
     case '*'
-        logger 4 "No support package manager detected"
+        logger 5 "No support package manager detected"
 end
 end
 function upgrade
@@ -274,7 +281,7 @@ function upgrade
         case xbps
             sudo $package_manager-install -Su
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -289,7 +296,7 @@ function show
         case xbps
             $package_manager-query -RS $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -355,9 +362,9 @@ function user_purge
             if test -e ~/.ctpm/package_info/$package_ctpm.unis
             rm ~/.ctpm/package_info/$package_ctpm.unis
             end
-            logger 1 purged package:$package_ctpm
+            logger 2 "purged package:$package_ctpm"
         else
-            logger 4 "no info file of package:$package_ctpm,abort"
+            logger 5 "Info file of package:$package_ctpm has been lost, abort"
         end
     end
 end
@@ -408,17 +415,17 @@ function extract
     end
     if [ -w /tmp/ctpm ]
     else
-        logger 4 'x /tmp/ctpm is not accessable to this user,abort'
+        logger 5 '/tmp/ctpm is not accessable to this user,abort'
     end
     for package_ctpm in $argv
         if test -e $package_ctpm
         else
-            logger 4 "x $package_ctpm not found,abort"
+            logger 5 "$package_ctpm not found,abort"
             exit
         end
         tar xf $package_ctpm -C /tmp/ctpm
         cd /tmp/ctpm
-        logger 0 '-> Extracted package'
+        logger 0 '-> Package extracted'
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
         set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
@@ -431,12 +438,12 @@ function extract
             case sys
                 sys_install
             case h '*'
-                logger 4 "x Unknown package level,abort"
+                logger 5 "Unknown package level,abort"
                 exit
         end
         cd $recudir
         rm -rf ctpm
-        logger 0 "√ Processed"
+        logger 2 "Processed"
     end
 end
 
@@ -502,9 +509,9 @@ function sys_purge
             if test -d /var/lib/ctpm/package_info/$package_ctpm.unis
                 sudo rm /var/lib/ctpm/package_info/$package_ctpm.unis
             end
-            logger 1 purged package:$package_ctpm
+            logger 2 "Purged package:$package_ctpm"
         else
-            logger 4 "no info file of package:$package_ctpm,abort"
+            logger 5 "Info file of package:$package_ctpm has been lost, abort"
         end
     end
 end
@@ -518,13 +525,13 @@ function autoremove
         case pacman
             sudo $package_manager -Rsnc (pacman -Qtdq) $argv
         case apk
-            logger 4 'No Such function in alpine apk'
+            logger 5 'No Such function in alpine apk'
         case dnf yum
             sudo $package_manager autoremove $argv
         case xbps
             sudo $package_manager-remove -Oo $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -541,7 +548,7 @@ function update
         case xbps
             sudo $package_manager-install -S $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -560,7 +567,7 @@ function source_list
         case xbps
             $package_manager-query -L $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -577,7 +584,7 @@ function list
         case xbps
             $package_manager-query -l $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -594,7 +601,7 @@ function install
         case xbps
             sudo $package_manager-install $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end
 
@@ -608,21 +615,21 @@ function grab
     end
     switch $argv[1]
         case upd
-            logger 0 "+ Cleaning ctpm[R] package database cache"
+            logger 0 "Cleaning ctpm[R] package database cache"
             if echo | sudo tee /var/lib/ctpm/world &>/dev/null
-                logger 1 "- ctpm[R] package database cache purged"
+                logger 1 "ctpm[R] package database cache purged"
             else
-                logger 4 "x Failed to clean ctpm[R] package database cache, abort"
+                logger 5 "Failed to clean ctpm[R] package database cache, abort"
                 exit
             end
-            logger 0 "+ Refreshing ctpm[R] package database"
+            logger 0 "Refreshing ctpm[R] package database"
             if for target_source in (seq 1 $counter_source)
-                    logger 0 "+ Refreshing source $ctpm_source[$target_source] from $ctpm_source_link[$target_source]"
+                    logger 0 "Refreshing source $ctpm_source[$target_source] from $ctpm_source_link[$target_source]"
                     curl --progress-bar -L "$ctpm_source_link[$target_source]/list" | sed -e "s/^/$ctpm_source[$target_source]\//" | sudo tee -a /var/lib/ctpm/world &>/dev/null
                 end
-                logger 1 "√ ctpm[R] database is up to date"
+                logger 2 "ctpm[R] database is up to date"
             else
-                logger 4 "x Critical error when trying to update ctpm[R] database, abort"
+                logger 5 "Critical error when trying to update ctpm[R] database, abort"
                 exit
             end
         case upg
@@ -639,7 +646,7 @@ function grab
                             set upgrade_package[$counter_upg] "$package_repo/$ctpm_package"
                         end
                     else
-                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
+                        logger 4 "Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end
@@ -654,12 +661,12 @@ function grab
                             set upgrade_package[$counter_upg] "$package_repo/$ctpm_package"
                         end
                     else
-                        logger 3 "! Package: $ctpm_package is not found in the source, ignore it"
+                        logger 4 "Package: $ctpm_package is not found in the source, ignore it"
                     end
                 end
             end
             if test "$upgrade_package" = ""
-                logger 0 "√ Your system is up to date"
+                logger 2 "Your system is up to date"
             else
                 if set -q _flag_no_confirm
                     grab $upgrade_package -y
@@ -678,7 +685,7 @@ function grab
         case sc
             cat /etc/centerlinux/conf.d/ctpkg.source
         case '*'
-            logger 0 "+ Checking for packages..."
+            logger 0 "Checking for packages..."
             set counter_grab 0
             set counter_grab_ignore 0
             for ctpm_package in $argv
@@ -691,19 +698,19 @@ function grab
                 end
             end
             if test "$grab_package" = ""
-                logger 0 "x Nothing to grab, abort"
-                logger 3 "! The following packages won't be installed, cuz they're not available in any cloudrepo"
+                logger 5 "Nothing to grab, abort"
+                logger 4 "The following packages won't be installed, cuz they're not available in any cloudrepo"
                 logger 0 -----------
                 logger 0 "$grab_ignore"
                 logger 0 -----------
             else
-                logger 3 "* The following packages is available,grab them all?[y/N]"
+                logger 4 "The following packages is available,grab them all?[y/N]"
                 logger 0 -----------
                 logger 0 "$grab_package"
                 logger 0 -----------
                 if test "$grab_ignore" = ""
                 else
-                    logger 3 "! The following packages won't be installed, cuz they're not available in any cloudrepo"
+                    logger 4 "The following packages won't be installed, cuz they're not available in any cloudrepo"
                     logger 0 -----------
                     logger 0 "$grab_ignore"
                     logger 0 -----------
@@ -714,7 +721,7 @@ function grab
                     switch $grab_confirm
                         case y Y
                         case n N '*'
-                            logger 3 "- Aborted by user"
+                            logger 1 "Aborted by user"
                             exit
                     end
                 end
@@ -731,27 +738,26 @@ function grab
                         set target_source_link $ctpm_source_link[$sources]
                     end
                 end
-                logger 0 "+ Grabbing $ctpm_package"
+                logger 0 "Grabbing $ctpm_package"
                 if curl --progress-bar -L -o /tmp/$ctpm_package.ctpkg $target_source_link/$ctpm_package.ctpkg
                     if file /tmp/$ctpm_package.ctpkg | grep -q 'gzip compressed'
                     else
-                        logger 4 "- The package seems not a ctpkg file,remove and abort,please try to download again and check the package name you typed"
+                        logger 4 "The package downloaded for $ctpm_package seems not a ctpkg file,remove and skip it,please try to download again and check the package name you typed"
                         rm /tmp/$ctpm_package.ctpkg
-                        exit
                     end
-                    logger 1 "+ package:$ctpm_package Downloaded,installing..."
+                    logger 1 "Package:$ctpm_package Downloaded,installing..."
                     cd /tmp
                     extract $ctpm_package.ctpkg
                     rm $ctpm_package.ctpkg
                 else
-                    logger 4 "! package:$ctpm_package failed to download,ignored"
+                    logger 4 "Package:$ctpm_package failed to download,ignored"
                 end
             end
     end
 end
 
 function aur-search
-    logger 0 "+ Querying aur..."
+    logger 0 "Querying aur..."
     for keywords in $argv
         curl -sL "https://aur.archlinux.org/rpc/?v=5&type=search&arg=$keywords" | jq -r '.results as $data | $data[] | "\n\u001b[32maur-pacman/"+.Name+" "+.Version+"\u001b[32m","\u001b[0mDescription: "+.Description'
     end
@@ -762,24 +768,24 @@ function aur-install
     dir_exist ~/.ctpm/aur
     cd ~/.ctpm/aur
     function aur-get-pkgbuild
-        logger 0 "+ Getting $argv PKGBUILD file"
+        logger 0 "Getting $argv PKGBUILD file"
         if test (curl --progress-bar -sL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$argv" | head -n1) != "<!DOCTYPE html>"
-            logger 1 "+ Check passed,getting build files"
+            logger 1 "Check passed,getting build files"
         else
-            logger 4 "! Unable to get the PKGBUILD file of "$argv", please check your package name and network connection, abort"
+            logger 5 "Unable to get the PKGBUILD file of "$argv", please check your package name and network connection, abort"
             exit
         end
         if git clone "https://aur.archlinux.org/$argv"
-            logger 1 "- Build files downloaded,please review it,then press ctrl+x to continue"
+            logger 1 "Build files downloaded,please review it,then press ctrl+x to continue"
             sleep 1
         else
-            logger 4 "! Unable to get build files of "$argv", please check your package name and network connection, abort"
+            logger 5 "Unable to get build files of "$argv", please check your package name and network connection, abort"
             exit
         end
     end
     for target in $argv
         if test -e ~/.ctpm/aur/$target/PKGBUILD
-            logger 0 '? Detected an existed BUILDPKG file, would you want to remove it and build it from aur?[y/N]'
+            logger 3 'Detected an existed BUILDPKG file, would you want to remove it and build it from aur?[y/N]'
             read -n1 -P "$prefix >>> " _delete_var_
             switch $_delete_var_
                 case Y y
@@ -794,9 +800,9 @@ function aur-install
         command nano PKGBUILD
         if test "$aur_build_only" = true
             if makepkg -s
-                logger 1 "Store at ~/.ctpm/aur/$target/"
+                logger 2 "Store at ~/.ctpm/aur/$target/"
             else
-                logger 4 "Package $target failed to build"
+                logger 5 "Package $target failed to build"
             end
         else
             makepkg -si
@@ -824,12 +830,12 @@ function ctconfig_init
     end
     if test -d /var/lib/ctpm/package_info
     else
-        logger 3 'Creating ctpm package info database'
+        logger 4 'Creating ctpm package info database'
         sudo mkdir -p /var/lib/ctpm/package_info
     end
     if test -d ~/.ctpm/package_info
     else
-        logger 3 'Creating ctpm user package info database'
+        logger 4 'Creating ctpm user package info database'
         mkdir -p ~/.ctpm/package_info
     end
 end
@@ -869,7 +875,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-06-24_05:23:54
+echo Build_Time_UTC=2022-06-28_04:10:16
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv
 ctconfig_init
@@ -881,12 +887,12 @@ argparse -i -n $prefix 'b/ctbackend=' -- $argv
 if set -q _flag_ctbackend
     set -g package_manager $_flag_ctbackend
 end
-logger 0 "+ Set backend as $package_manager"
+logger 0 "Set backend as $package_manager"
 switch $argv[1]
     case c
         clean $argv[2..-1]
     case grab
-        logger 0 "+ Loading grab-ctpm(plugin)"
+        logger 0 "Loading grab-ctpm(plugin)"
         grab $argv[2..-1]
     case i
         install $argv[2..-1]
@@ -909,7 +915,7 @@ switch $argv[1]
     case upg
         upgrade $argv[2..-1]
     case aur
-        logger 0 "+ Loading aur-pacman(plugin)..."
+        logger 0 "Loading aur-pacman(plugin)..."
         checkdependence jq git
         switch $argv[2]
             case i
@@ -920,13 +926,13 @@ switch $argv[1]
             case s
                 aur-search $argv[3..-1]
             case c
-                logger 0 '? Please confirm that you really want to clean aur build cache[y/N]'
+                logger 3 'Please confirm that you really want to clean aur build cache[y/N]'
                 read -n1 -P "$prefix >>> " _delete_var_
                 switch $_delete_var_
                     case Y y
                         rm -rf ~/.ctpm/aur/*
                     case N n '*'
-                        logger 0 Abort
+                        logger 1 Abort
                 end
         end
     case ctpm
@@ -963,7 +969,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 0 "+ CenterLinux Package Manager Hairpin@build4 | TeaHouseLab at ruzhtw.top"
+        logger 1 "+ CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

@@ -14,6 +14,6 @@ function purge
         case xbps
             sudo $package_manager-remove -R $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end

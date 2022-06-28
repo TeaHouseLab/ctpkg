@@ -7,6 +7,6 @@ function search
         case xbps
             $package_manager-query -Rs $argv
         case '*'
-            logger 4 "No support package manager detected"
+            logger 5 "No support package manager detected"
     end
 end

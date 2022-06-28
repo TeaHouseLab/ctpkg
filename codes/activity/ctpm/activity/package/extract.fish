@@ -7,17 +7,17 @@ function extract
     end
     if [ -w /tmp/ctpm ]
     else
-        logger 4 'x /tmp/ctpm is not accessable to this user,abort'
+        logger 5 '/tmp/ctpm is not accessable to this user,abort'
     end
     for package_ctpm in $argv
         if test -e $package_ctpm
         else
-            logger 4 "x $package_ctpm not found,abort"
+            logger 5 "$package_ctpm not found,abort"
             exit
         end
         tar xf $package_ctpm -C /tmp/ctpm
         cd /tmp/ctpm
-        logger 0 '-> Extracted package'
+        logger 0 '-> Package extracted'
         set -lx package_name (sed -n '/package_name=/'p ctpm_pkg_info | sed 's/package_name=//g')
         set -lx package_ver (sed -n '/package_ver=/'p ctpm_pkg_info | sed 's/package_ver=//g')
         set -lx package_relver (sed -n '/package_relver=/'p ctpm_pkg_info | sed 's/package_relver=//g')
@@ -30,11 +30,11 @@ function extract
             case sys
                 sys_install
             case h '*'
-                logger 4 "x Unknown package level,abort"
+                logger 5 "Unknown package level,abort"
                 exit
         end
         cd $recudir
         rm -rf ctpm
-        logger 0 "√ Processed"
+        logger 2 "Processed"
     end
 end
