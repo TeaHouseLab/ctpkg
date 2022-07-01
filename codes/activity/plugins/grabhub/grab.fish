@@ -8,22 +8,19 @@ function grab
     end
     switch $argv[1]
         case upd
-            logger 0 "Cleaning ctpm[R] package database cache"
             if echo | sudo tee /var/lib/ctpm/world &>/dev/null
-                logger 1 "ctpm[R] package database cache purged"
             else
-                logger 5 "Failed to clean ctpm[R] package database cache, abort"
-                exit
+                logger 5 "Failed to clean ctpm package database cache, abort"
+                exit 1
             end
-            logger 0 "Refreshing ctpm[R] package database"
             if for target_source in (seq 1 $counter_source)
                     logger 0 "Refreshing source $ctpm_source[$target_source] from $ctpm_source_link[$target_source]"
                     curl --progress-bar -L "$ctpm_source_link[$target_source]/list" | sed -e "s/^/$ctpm_source[$target_source]\//" | sudo tee -a /var/lib/ctpm/world &>/dev/null
                 end
-                logger 2 "ctpm[R] database is up to date"
+                logger 2 "ctpm database is up to date"
             else
                 logger 5 "Critical error when trying to update ctpm[R] database, abort"
-                exit
+                exit 1
             end
         case upg
             set counter_upg 0

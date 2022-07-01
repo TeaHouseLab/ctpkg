@@ -1,5 +1,5 @@
 set -lx prefix [ctpkg]
-checkdependence file curl tar rm mv
+checkdependence file curl tar rm mv sudo
 ctconfig_init
 set -g package_manager (sed -n '/backend=/'p /etc/centerlinux/conf.d/ctpkg.conf | sed 's/backend=//g')
 if [ "$package_manager" = "" ]
