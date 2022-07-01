@@ -872,7 +872,7 @@ function detectos
     end
 end
 
-echo Build_Time_UTC=2022-07-01_05:15:55
+echo Build_Time_UTC=2022-07-01_05:17:58
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv sudo
 ctconfig_init
@@ -966,7 +966,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 1 "+ CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
+        logger 1 "CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

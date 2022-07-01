@@ -91,7 +91,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 1 "+ CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
+        logger 1 "CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
