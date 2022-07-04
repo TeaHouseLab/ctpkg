@@ -4,8 +4,8 @@ function clean
             sudo $package_manager clean $argv
         case pacman
             sudo $package_manager -Scc $argv
-        case apk
-            logger 5 "No Such function in alpine apk"
+        case apk opkg
+            logger 5 "Not support in $package_manager"
         case dnf yum
             sudo $package_manager clean $argv
         case xbps

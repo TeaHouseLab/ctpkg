@@ -1,15 +1,13 @@
 function list
     switch $package_manager
         case apt aptitude
-            apt list --installed $argv
+            apt list $argv
         case pacman
-            $package_manager -Qq $argv
-        case apk
+            $package_manager -Sl $argv
+        case yum dnf apk opkg
             $package_manager list $argv
-        case yum dnf
-            rpm -qa
         case xbps
-            $package_manager-query -l $argv
+            $package_manager-query -Rs '*' $argv
         case '*'
             logger 5 "No support package manager detected"
     end

@@ -12,7 +12,10 @@ function upgrade
         case dnf yum
             sudo $package_manager upgrade $argv
         case xbps
-            sudo $package_manager-install -Su
+            sudo $package_manager-install -Su $argv
+        case opkg
+            sudo $package_manager update
+            sudo $package_manager upgrade (sudo $package_manager list-upgradable | awk '{print $1}')
         case '*'
             logger 5 "No support package manager detected"
     end

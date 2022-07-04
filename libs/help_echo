@@ -15,7 +15,9 @@ system package managment
 
     s: Search a package
 
-    l: Print a list of all installed packages
+    l: Print a list of all avaiable packages
+    
+    li: Print a list of all installed packages
 
     si: Show the info of a package
 
@@ -81,7 +83,7 @@ Args
 
     -b/--ctbackend: Force set a backend for ctpkg system package managment system
         Example: ctpkg -b apt i fish
-        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum'}
+        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum', 'opkg'}
     
     BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf, and /etc/centerlinux/conf.d/ctpkg.source for ctpm sources
 '

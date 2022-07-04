@@ -1,11 +1,9 @@
 function update
     switch $package_manager
-        case apt aptitude
+        case apt aptitude opkg apk
             sudo $package_manager update $argv
         case pacman
             sudo $package_manager -Sy $argv
-        case apk
-            sudo $package_manager update $argv
         case dnf yum
             sudo $package_manager check-update $argv
         case xbps

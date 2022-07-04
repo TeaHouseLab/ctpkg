@@ -9,7 +9,7 @@ function purge
             sudo $package_manager -Rsn $argv
         case apk
             sudo $package_manager del $argv
-        case dnf yum
+        case dnf yum opkg
             sudo $package_manager remove $argv
         case xbps
             sudo $package_manager-remove -R $argv

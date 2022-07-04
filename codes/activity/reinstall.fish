@@ -11,6 +11,8 @@ function reinstall
         sudo $package_manager reinstall $argv
     case xbps
         sudo $package_manager-install -f $argv
+    case opkg
+        sudo $package_manager install --force-reinstall $argv
     case '*'
         logger 5 "No support package manager detected"
 end

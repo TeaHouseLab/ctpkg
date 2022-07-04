@@ -1,6 +1,6 @@
 function install
     switch $package_manager
-        case apt aptitude
+        case apt aptitude opkg
             sudo $package_manager install $argv
         case pacman
             sudo $package_manager -S $argv

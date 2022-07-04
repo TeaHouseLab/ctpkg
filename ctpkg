@@ -17,7 +17,9 @@ system package managment
 
     s: Search a package
 
-    l: Print a list of all installed packages
+    l: Print a list of all avaiable packages
+    
+    li: Print a list of all installed packages
 
     si: Show the info of a package
 
@@ -83,7 +85,7 @@ Args
 
     -b/--ctbackend: Force set a backend for ctpkg system package managment system
         Example: ctpkg -b apt i fish
-        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum'}
+        Note: Available{'apt', 'aptitude', 'pacman', 'apk', 'dnf', 'xbps', 'yum', 'opkg'}
     
     BIGNOTE: You can find these in configure file, which is located in /etc/centerlinux/conf.d/ctpkg.conf, and /etc/centerlinux/conf.d/ctpkg.source for ctpm sources
 '
@@ -206,6 +208,10 @@ function search
             $package_manager -Ss $argv
         case xbps
             $package_manager-query -Rs $argv
+        case opkg
+            for package in $argv
+                $package_manager list | grep $package
+            end
         case '*'
             logger 5 "No support package manager detected"
     end
@@ -222,7 +228,7 @@ function purge
             sudo $package_manager -Rsn $argv
         case apk
             sudo $package_manager del $argv
-        case dnf yum
+        case dnf yum opkg
             sudo $package_manager remove $argv
         case xbps
             sudo $package_manager-remove -R $argv
@@ -237,8 +243,8 @@ function clean
             sudo $package_manager clean $argv
         case pacman
             sudo $package_manager -Scc $argv
-        case apk
-            logger 5 "No Such function in alpine apk"
+        case apk opkg
+            logger 5 "Not support in $package_manager"
         case dnf yum
             sudo $package_manager clean $argv
         case xbps
@@ -261,6 +267,8 @@ function reinstall
         sudo $package_manager reinstall $argv
     case xbps
         sudo $package_manager-install -f $argv
+    case opkg
+        sudo $package_manager install --force-reinstall $argv
     case '*'
         logger 5 "No support package manager detected"
 end
@@ -279,7 +287,29 @@ function upgrade
         case dnf yum
             sudo $package_manager upgrade $argv
         case xbps
-            sudo $package_manager-install -Su
+            sudo $package_manager-install -Su $argv
+        case opkg
+            sudo $package_manager update
+            sudo $package_manager upgrade (sudo $package_manager list-upgradable | awk '{print $1}')
+        case '*'
+            logger 5 "No support package manager detected"
+    end
+end
+
+function list_installed
+    switch $package_manager
+        case apt aptitude
+            apt list --installed $argv
+        case pacman
+            $package_manager -Q $argv
+        case apk
+            $package_manager list -I $argv
+        case yum dnf
+            rpm -qa
+        case xbps
+            $package_manager-query -l $argv
+        case opkg
+            $package_manager list-installed $argv
         case '*'
             logger 5 "No support package manager detected"
     end
@@ -291,7 +321,7 @@ function show
             $package_manager show $argv
         case pacman
             $package_manager -Si $argv
-        case apk dnf yum
+        case apk dnf yum opkg
             $package_manager info $argv
         case xbps
             $package_manager-query -RS $argv
@@ -524,8 +554,8 @@ function autoremove
             sudo $package_manager -o Aptitude::Delete-Unused=1 install $argv
         case pacman
             sudo $package_manager -Rsnc (pacman -Qtdq) $argv
-        case apk
-            logger 5 'No Such function in alpine apk'
+        case apk opkg
+            logger 5 "Not support in $package_manager"
         case dnf yum
             sudo $package_manager autoremove $argv
         case xbps
@@ -537,12 +567,10 @@ end
 
 function update
     switch $package_manager
-        case apt aptitude
+        case apt aptitude opkg apk
             sudo $package_manager update $argv
         case pacman
             sudo $package_manager -Sy $argv
-        case apk
-            sudo $package_manager update $argv
         case dnf yum
             sudo $package_manager check-update $argv
         case xbps
@@ -559,13 +587,16 @@ function source_list
             cat /etc/apt/sources.list.d/* | grep --color=never deb
         case pacman
             cat /etc/pacman.d/mirrorlist | grep --color=never "Server ="
-            cat /etc/pacman.conf | grep --color=never "Server =" 
+            cat /etc/pacman.conf | grep --color=never "Server ="
         case apk
             cat /etc/apk/repositories $argv
         case dnf yum
             $package_manager repolist $argv
         case xbps
             $package_manager-query -L $argv
+        case opkg
+            cat /etc/opkg/distfeeds.conf | sed -e '/^\s*#/d'
+            cat /etc/opkg/customfeeds.conf | sed -e '/^\s*#/d'
         case '*'
             logger 5 "No support package manager detected"
     end
@@ -574,15 +605,13 @@ end
 function list
     switch $package_manager
         case apt aptitude
-            apt list --installed $argv
+            apt list $argv
         case pacman
-            $package_manager -Qq $argv
-        case apk
+            $package_manager -Sl $argv
+        case yum dnf apk opkg
             $package_manager list $argv
-        case yum dnf
-            rpm -qa
         case xbps
-            $package_manager-query -l $argv
+            $package_manager-query -Rs '*' $argv
         case '*'
             logger 5 "No support package manager detected"
     end
@@ -590,7 +619,7 @@ end
 
 function install
     switch $package_manager
-        case apt aptitude
+        case apt aptitude opkg
             sudo $package_manager install $argv
         case pacman
             sudo $package_manager -S $argv
@@ -838,7 +867,6 @@ function ctconfig_init
 end
 
 function detectos
-    #debian
     if test -e /etc/debian_version
         if command -q aptitude
             set -g package_manager aptitude
@@ -846,33 +874,31 @@ function detectos
             set -g package_manager apt
         end
     end
-    #archlinux
     if test -e /etc/arch-release
         if command -q pacman
             set -g package_manager pacman
         end
     end
-    #alpine
     if test -e /etc/alpine-release
         if command -q apk
             set -g package_manager apk
         end
     end
-    #fedora
     if test -e /etc/fedora-release
         set -g package_manager dnf
     end
-    #centos
     if test -e /etc/centos-release
         set -g package_manager yum
     end
-    #voidlinux
     if command -q xbps-install
         set -g package_manager xbps
     end
+    if test -e /etc/openwrt_release
+        set -g package_manager opkg
+    end
 end
 
-echo Build_Time_UTC=2022-07-01_05:17:58
+echo Build_Time_UTC=2022-07-04_10:08:42
 set -lx prefix [ctpkg]
 checkdependence file curl tar rm mv sudo
 ctconfig_init
@@ -903,6 +929,8 @@ switch $argv[1]
         search $argv[2..-1]
     case l
         list $argv[2..-1]
+    case li
+        list_installed $argv[2..-1]
     case si
         show $argv[2..-1]
     case sc
@@ -966,7 +994,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 1 "CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
+        logger 1 "CenterLinux Package Manager Hairpin@build6 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end

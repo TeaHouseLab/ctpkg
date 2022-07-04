@@ -28,6 +28,8 @@ switch $argv[1]
         search $argv[2..-1]
     case l
         list $argv[2..-1]
+    case li
+        list_installed $argv[2..-1]
     case si
         show $argv[2..-1]
     case sc
@@ -91,7 +93,7 @@ switch $argv[1]
     case uninstall
         uninstall_script ctpkg
     case v version
-        logger 1 "CenterLinux Package Manager Hairpin@build5 | TeaHouseLab at ruzhtw.top"
+        logger 1 "CenterLinux Package Manager Hairpin@build6 | TeaHouseLab at ruzhtw.top"
     case h help '*'
         help_echo
 end
